@@ -1,0 +1,49 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<groupId>ar.gob.onti.firmador</groupId>
+	<artifactId>Firmador_Parent</artifactId>
+	<packaging>pom</packaging>
+	<version>1.0-SNAPSHOT</version>
+	<name>Firmador: Parent POM</name>
+  
+	<build>
+	<pluginManagement>
+		<plugins>
+		<plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-dependency-plugin</artifactId>
+         </plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<configuration>
+					<source>1.6</source>
+					<target>1.6</target>
+					<encoding>ISO-8859-1</encoding>
+				</configuration>
+				<inherited>true</inherited>
+			</plugin>
+			<plugin>
+				<artifactId>maven-eclipse-plugin</artifactId>
+				<configuration>
+					<outputDirectory>${project.build.directory}/eclipse-bin</outputDirectory>
+				</configuration>
+				<inherited>true</inherited>
+			</plugin>
+			<plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>sonar-maven-plugin</artifactId>
+        <version>1.0-beta-2</version>
+      </plugin>
+		</plugins>
+	</pluginManagement>
+	</build>
+	<dependencies>
+  	</dependencies>
+
+	<modules>
+	<module>Firmador_Applet</module>
+    </modules>
+
+</project>
