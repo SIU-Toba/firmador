@@ -241,7 +241,7 @@ public class FirmaControler {
 			myProps.getMapaDatosUsuarioFirma().put("SERIAL_CERTIFICADO", mainWindow.getPdfControler().getCertSerial());
 			myProps.getMapaDatosUsuarioFirma().put("HASH_CERTIFICADO", mainWindow.getPdfControler().getCertHash("SHA1"));
 			mainWindow.setArchivoFirmado(new File(mainWindow.getArchivoParaFirmar().getParent()+"//"+getNombreArchivoFirmado()));
-			mostrarMensajesOk(container, myProps.getString("firmaOK"), myProps.getString("firmaDictamenes"));
+			//mostrarMensajesOk(container, myProps.getString("firmaOK"), myProps.getString("firmaDictamenes"));
 		} else {
 			 mostrarMensajesError(container,  myProps.getString("errorFirma") + mainWindow.getPdfControler().getSignError(), null);
 			return false;
@@ -268,7 +268,7 @@ public class FirmaControler {
 			aCertsDlg.inicializar(findParentFrame(), mainWindow.getPdfControler().getKeyStores(), mainWindow.getSignProps().getAutoCertificantes());
 			if (aCertsDlg.getSelectedCert().length() > 0){
 				mainWindow.getCertSelecionado().setText(aCertsDlg.getSelectedCert());
-				if(!mainWindow.getPdfControler().cargarClavePrivadaYCadenaDeCertificados( mainWindow.getCertSelecionado().getText().trim(), tokenPin, true)){
+				if(!mainWindow.getPdfControler().cargarClavePrivadaYCadenaDeCertificados( mainWindow.getCertSelecionado().getText().trim(), tokenPin, false)){
 					mostrarMensajesError(mainWindow.getContainer(),mainWindow.getPdfControler().getSignError() , null);
 					return false;
 				}
@@ -310,7 +310,7 @@ public class FirmaControler {
 			if (fileUp.connectURL(mainWindow.getSignProps().getUploadURL())) {
 
 				if (fileUp.doUpload(mainWindow.getArchivoFirmado().getPath(),mainWindow.getSignProps(), mainWindow.getCodigo(), mainWindow.getObjetoDominio(), mainWindow.getTipoArchivo()) ) {
-					mostrarMensajesOk(container, myProps.getString("archivoEnviadoExtosamente"),  myProps.getString("envioDictamenes"));
+					//mostrarMensajesOk(container, myProps.getString("archivoEnviadoExtosamente"),  myProps.getString("envioDictamenes"));
 					return true;
 				} else {
 					mostrarMensajesError(container, myProps.getString("errorEnvioServer") + fileUp.getHttpFileError(), null);
@@ -325,17 +325,9 @@ public class FirmaControler {
 	  
 	public String agregarParametroUrl(Container container,String url,HttpFileDownLoader fileDown){
 		String nuevaURL=url;
-		
+		String concatenar = nuevaURL.indexOf("?") >= 0 ? "&" : "?";
 		//try {
-			if (nuevaURL.indexOf("?") >= 0) 
-			{
-				nuevaURL = nuevaURL + "&idDominio=" + this.mainWindow.getObjetoDominio() + "&tipoDeArchivo=" + this.mainWindow.getTipoArchivo();
-			} 
-			else 
-			{
-				nuevaURL = nuevaURL + "?idDominio=" + this.mainWindow.getObjetoDominio() + "&tipoDeArchivo=" + this.mainWindow.getTipoArchivo();			
-			}
-			
+            nuevaURL = nuevaURL + concatenar + "codigo=" + this.mainWindow.getCodigo();
 			mainWindow.getSignProps().setNombreArchivoTemporal(UUID.randomUUID().toString() + ".pdf");
 			fileDown.setLocalFileName(mainWindow.getSignProps().getNombreArchivoTemporal());
 		//} catch (UnsupportedEncodingException e) {
@@ -364,7 +356,7 @@ public class FirmaControler {
 						mainWindow.setArchivoParaFirmar(new File(mainWindow.getSignProps().getSourceDir() + File.separator + fileDown.getLocalFileName()));
 						if (FileSystem.getInstance().isExisteArchivo(mainWindow.getArchivoParaFirmar())) {
 							mainWindow.setCtrls("descargaOK");
-							mostrarMensajesOk(container, myProps.getString("msjDescargaOK"), myProps.getString("descargaDictamen"));
+							//mostrarMensajesOk(container, myProps.getString("msjDescargaOK"), myProps.getString("descargaDictamen"));
 
 							//Nuevo requerimiento: Una vez finalizado la descarga del documento, debe ser visualizado en pantalla
 							visualizarDocumento(container, mainWindow.getArchivoParaFirmar());
@@ -413,7 +405,7 @@ public class FirmaControler {
 			mainWindow.setArchivoParaFirmar(new File(destFile));
 			if (FileSystem.getInstance().isExisteArchivo(mainWindow.getArchivoParaFirmar())) {
 				mainWindow.setCtrls("descargaOK");
-				mostrarMensajesOk(container, myProps.getString("msjDescargaOK"), myProps.getString("descargaDictamen"));
+				//mostrarMensajesOk(container, myProps.getString("msjDescargaOK"), myProps.getString("descargaDictamen"));
 
 				//Nuevo requerimiento: Una vez finalizado la descarga del documento, debe ser visualizado en pantalla
 				visualizarDocumento(container, mainWindow.getArchivoParaFirmar());

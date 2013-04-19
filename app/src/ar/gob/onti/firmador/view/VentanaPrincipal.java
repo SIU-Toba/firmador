@@ -288,12 +288,15 @@ public class VentanaPrincipal  {
 
 			botonSubirPdf.addActionListener(new java.awt.event.ActionListener() {
 				public void actionPerformed(java.awt.event.ActionEvent evt) {
-					int repuesta = JOptionPane.showConfirmDialog(container,
-							myProps.getString("mensajeConfirmacionEnvio"),
-							myProps.getString("confirmacionEnvio"),
-							JOptionPane.YES_NO_OPTION);
 
-					if(repuesta==0 && firmaControler.subirDocumento(container)){
+					//int repuesta = JOptionPane.showConfirmDialog(container,
+					//		myProps.getString("mensajeConfirmacionEnvio"),
+					//		myProps.getString("confirmacionEnvio"),
+					//		JOptionPane.YES_NO_OPTION);					
+					
+					//if original
+					//if(repuesta==0 && firmaControler.subirDocumento(container)){
+					if(firmaControler.subirDocumento(container)){
 						
 							panelPrincipal.setVisible(false);
 							container.add(panelFirmaExitosa);
@@ -434,16 +437,16 @@ public class VentanaPrincipal  {
 						.addGroup(myLayout.createSequentialGroup().
 								addGap(50,50,50).
 								addComponent(getBotonFirmar(),GroupLayout.PREFERRED_SIZE, 200,GroupLayout.PREFERRED_SIZE).
-								addGap(4,4,4).
-								addComponent(getBotonFlechaDerecha(),GroupLayout.PREFERRED_SIZE, 50,GroupLayout.PREFERRED_SIZE).
+								//addGap(4,4,4).
+								//addComponent(getBotonFlechaDerecha(),GroupLayout.PREFERRED_SIZE, 50,GroupLayout.PREFERRED_SIZE).
 								addGap(4,4,4).
 								addComponent(getBotonSubirPdf(),GroupLayout.PREFERRED_SIZE, 230,GroupLayout.PREFERRED_SIZE))
 
 								.addGroup(myLayout.createSequentialGroup().
 										addGap(190,190,190).
 										addComponent(getBotonVerPdf(),GroupLayout.PREFERRED_SIZE, 200,GroupLayout.PREFERRED_SIZE).
-										addGap(100,100,100).
-										addComponent(getBotonAyuda(),GroupLayout.PREFERRED_SIZE, 80,GroupLayout.PREFERRED_SIZE).
+										//addGap(100,100,100).
+										//addComponent(getBotonAyuda(),GroupLayout.PREFERRED_SIZE, 80,GroupLayout.PREFERRED_SIZE).
 										addGap(20,20,20))					
 		);
 
@@ -456,14 +459,15 @@ public class VentanaPrincipal  {
 
 						.addGroup(myLayout.createParallelGroup(GroupLayout.Alignment.BASELINE).
 								addComponent(getBotonFirmar(),GroupLayout.PREFERRED_SIZE, 90,GroupLayout.PREFERRED_SIZE).
-								addComponent(getBotonFlechaDerecha(),GroupLayout.PREFERRED_SIZE, 90,GroupLayout.PREFERRED_SIZE).
+								//addComponent(getBotonFlechaDerecha(),GroupLayout.PREFERRED_SIZE, 90,GroupLayout.PREFERRED_SIZE).
 								addComponent(getBotonSubirPdf(),GroupLayout.PREFERRED_SIZE, 90,GroupLayout.PREFERRED_SIZE)
 						).
 						addGap(50,50,50).
 						addGroup(myLayout.createParallelGroup(GroupLayout.Alignment.BASELINE).
-								addComponent(getBotonVerPdf(),GroupLayout.PREFERRED_SIZE, 40,GroupLayout.PREFERRED_SIZE).
+								addComponent(getBotonVerPdf(),GroupLayout.PREFERRED_SIZE, 40,GroupLayout.PREFERRED_SIZE)
 
-								addComponent(getBotonAyuda(),GroupLayout.PREFERRED_SIZE, 40,GroupLayout.PREFERRED_SIZE))
+								//addComponent(getBotonAyuda(),GroupLayout.PREFERRED_SIZE, 40,GroupLayout.PREFERRED_SIZE)
+								)
 
 
 		);

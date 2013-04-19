@@ -182,10 +182,10 @@ public class HttpFileUploader extends HttpFileConnection {
 		try {			
 			PostMethod post = new PostMethod(myProps.getUploadURL());
 			Part[] parts = {
-					new StringPart("idDominio", objetoDominio),
-					new StringPart("tipoDeArchivo", tipoArchivo),
+					//new StringPart("idDominio", objetoDominio),
+					//new StringPart("tipoDeArchivo", tipoArchivo),
 					new StringPart("codigo", codigo),
-					new StringPart("userName", myProps.getUserName()),
+					//new StringPart("userName", myProps.getUserName()),
 					new FilePart("md5_fileSigned", new File(fileName))};
 			post.setRequestEntity( new MultipartRequestEntity(parts, post.getParams()) );
 			HttpClient client = new HttpClient();
@@ -212,9 +212,11 @@ public class HttpFileUploader extends HttpFileConnection {
 			}
 		}
 		catch (SocketException e) {
+            e.printStackTrace();
 			return doUploadApache(fileName, myProps, codigo, objetoDominio, tipoArchivo);
 		}
 		catch (Exception e) {
+            e.printStackTrace();            
             cargarMensajeDeError("", e);
             return false;
         }
@@ -323,10 +325,10 @@ public class HttpFileUploader extends HttpFileConnection {
 			conn.setDoOutput(true);
 		      
 			Part[] parts = {
-					new StringPart("idDominio", objetoDominio),
-					new StringPart("tipoDeArchivo", tipoArchivo),
+					//new StringPart("idDominio", objetoDominio),
+					//new StringPart("tipoDeArchivo", tipoArchivo),
 					new StringPart("codigo", codigo),
-					new StringPart("userName", myProps.getUserName()),
+					//new StringPart("userName", myProps.getUserName()),
 					new FilePart("md5_fileSigned", new File(fileName))};
 			
 			String boundary = Part.getBoundary();

@@ -13,8 +13,10 @@
 	<version>1.0</version>
 
 	<build>
+		<!-- 
+		No compila en linux
 		<testOutputDirectory>target/test-classes</testOutputDirectory>
-        <testSourceDirectory>test/src</testSourceDirectory>
+        	<testSourceDirectory>test/src</testSourceDirectory> -->
 		<sourceDirectory>app/src</sourceDirectory>
 		<resources>
 			<resource>
@@ -119,6 +121,7 @@
 			<artifactId>httpmime</artifactId>
 			<version>4.2.2</version>
 		</dependency>
+
 	</dependencies>
 	<profiles>
     <profile>
@@ -147,6 +150,25 @@
 					<keypass>${env.FIRMADOR_KEYPASS}</keypass>
 				</configuration>
 			</plugin>
+            
+             <plugin>
+                <artifactId>maven-antrun-plugin</artifactId>
+                <version>1.4</version>
+                <executions>
+                  <execution>
+                    <id>copy</id>
+                    <phase>install</phase>
+                    <configuration>
+                      <tasks>
+                        <copy file="target/FirmaApplet-1.0-jar-with-dependencies.jar" tofile="sample/firmador.jar"/>
+                      </tasks>
+                    </configuration>
+                    <goals>
+                      <goal>run</goal>
+                    </goals>
+                  </execution> 
+                </executions>
+              </plugin>
         </plugins>
       </build>
     </profile>
