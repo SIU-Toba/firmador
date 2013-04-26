@@ -111,6 +111,11 @@ class firmador_pdf
         return $url_actual;
    }
    
+   
+   //-----------------------------------------
+   //--- MANEJO DE SESION
+   //-----------------------------------------
+   
    protected function generar_sesion()
    {
         //Agregar un token a un archivo xml de sesiones (para evitar usar una BD en el ejemplo)
@@ -134,6 +139,11 @@ XML;
             }
          } else {
             //BD
+             $this->generar_tabla();
+             
+            //Insertar nueva sesión
+            $sql = "INSERT INTO firmador_pdf_sesion (sesion) VALUES (".$this->db->quote($sesion).")";
+            $this->db->exec($sql);
          }
         return $sesion;
      }
@@ -155,7 +165,34 @@ XML;
             return false;
         } else {
             //BD
+            $this->generar_tabla();
+            
+            //Borrar las sesiones expiradas
+            $sql = "DELETE FROM firmador_pdf_sesion WHERE creada < now() - interval '1 hour'";
+            $this->db->exec($sql);
+            
+            //Chequear esta sesion
+            $sql = "SELECT count(*) from firmador_pdf_sesion where sesion = ".$this->db->quote($sesion);
+            $rs = $this->db->query($sql);
+            return !empty($rs);
         }
+     }
+     
+     function generar_tabla()
+     {
+         $sql = "SELECT count(*) as cantidad from pg_tables where tablename = 'firmador_pdf_sesion'";
+         $fila = $this->db->query($sql)->fetch();
+         if ($fila['cantidad'] == 0) {
+             $sql = "CREATE TABLE firmador_pdf_sesion
+                 (
+                      sesion varchar NOT NULL,
+                      creada timestamp DEFAULT now(),
+                      CONSTRAINT sesion_firma_pdf_pkey PRIMARY KEY (sesion)
+                 )
+            ";
+             $this->db->exec($sql);
+         }
+
      }
      
 }
