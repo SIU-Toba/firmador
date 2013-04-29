@@ -1,11 +1,26 @@
 <?php
 
+interface firmador_pdf_acciones
+{
+    function get_stream_pdf_sin_firmar();
+    function set_pdf_firmado($path);
+}
+
 class firmador_pdf
 {
-    protected $usar_xml = false;
+    /**
+     * @var firmador_pdf_acciones
+     */
+    protected $acciones;
     protected $db = null;
     
-   function ejecutar() {
+    function __construct(firmador_pdf_acciones $acciones)
+    {
+        $this->acciones = $acciones;
+    }
+    
+    
+    function ejecutar() {
        $accion = isset($_GET['accion']) ? $_GET['accion'] : "applet";
        switch ($accion) {
            case 'descargar':
@@ -49,9 +64,7 @@ class firmador_pdf
         header("Pragma: no-cache");
         header("Expires: 0");
 
-        $file = dirname(__FILE__).'/docOriginal.pdf';
-        $fd = fopen($file,'r');
-        fpassthru($fd);
+        $this->acciones->get_stream_pdf_sin_firmar();
     }
     
     protected function subir_pdf()
@@ -71,12 +84,7 @@ class firmador_pdf
 //        file_put_contents("/tmp/subida", "Post: ".var_export($_POST, true)."\n", FILE_APPEND);
 //        file_put_contents("/tmp/subida", "Files: ".var_export($_FILES, true)."\n", FILE_APPEND);
 
-        $destino = dirname(__FILE__).'/docFirmado.pdf';
-        if (! move_uploaded_file($_FILES['md5_fileSigned']['tmp_name'], $destino)) {
-            error_log("Error uploading file");
-            header('HTTP/1.1 500 Internal Server Error');
-            die;
-        }
+        $this->acciones->set_pdf_firmado($_FILES['md5_fileSigned']['tmp_name']);
     }
     
     protected function generar_applet()

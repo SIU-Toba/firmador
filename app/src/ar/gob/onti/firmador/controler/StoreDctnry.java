@@ -151,6 +151,10 @@ public class StoreDctnry {
 				} 
 	
 				subjCN= PdfPKCS7.getSubjectFields(cerONTI).getField("CN");
+                                if (subjCN == null) {
+                                    subjCN = PdfPKCS7.getSubjectFields(cerONTI).getField("E");
+                                }
+
 				nroSerie = cerONTI.getSerialNumber().toString();
 				datCaducidad = (new SimpleDateFormat("dd/MM/yyyy")).format(cerONTI.getNotAfter());
 				Date upDate = cerONTI.getNotAfter();
