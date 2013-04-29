@@ -200,7 +200,7 @@ public class VentanaPrincipal  {
 		examinarIcon =  new ImageIcon(cl.getResource("images/folder_new.png"));
 		visualizarIcon =  new ImageIcon(cl.getResource("images/view.png"));	
 		firmarIcon =  new ImageIcon(cl.getResource("images/sign.png"));
-		tituloIcon =  new ImageIcon(cl.getResource("images/logo_jgm.gif"));
+		tituloIcon =  new ImageIcon(cl.getResource("images/Logosiu1.png"));
 		ayudaIcon =  new ImageIcon(cl.getResource("images/Help-32.png"));
 		flechaIcon =  new ImageIcon(cl.getResource("images/flecha-derecha.png"));
 		okIcon =  new ImageIcon(cl.getResource("images/ok.png"));
@@ -430,9 +430,9 @@ public class VentanaPrincipal  {
 				myLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
 
 				.addGroup(myLayout.createSequentialGroup().
-						addGap(15,15,15).
-						addComponent(getjLblPDFile(),GroupLayout.PREFERRED_SIZE, 360,GroupLayout.PREFERRED_SIZE).
-						addComponent(getLabelTitulo()))
+						addGap(15,15,15)
+						.addComponent(getjLblPDFile(),GroupLayout.PREFERRED_SIZE, 360,GroupLayout.PREFERRED_SIZE)
+                				.addComponent(getLabelTitulo()))
 
 						.addGroup(myLayout.createSequentialGroup().
 								addGap(50,50,50).
@@ -454,8 +454,9 @@ public class VentanaPrincipal  {
 		myLayout.setVerticalGroup(myLayout.createSequentialGroup()
 
 				.addGroup(myLayout.createParallelGroup(GroupLayout.Alignment.BASELINE)
-						.addComponent(getjLblPDFile(),GroupLayout.PREFERRED_SIZE, 100,GroupLayout.PREFERRED_SIZE)
-						.addComponent(getLabelTitulo(),GroupLayout.PREFERRED_SIZE, 100,GroupLayout.PREFERRED_SIZE))
+       						.addComponent(getjLblPDFile(),GroupLayout.PREFERRED_SIZE, 100,GroupLayout.PREFERRED_SIZE)
+                        			.addComponent(getLabelTitulo(),GroupLayout.PREFERRED_SIZE, 100,GroupLayout.PREFERRED_SIZE))
+
 
 						.addGroup(myLayout.createParallelGroup(GroupLayout.Alignment.BASELINE).
 								addComponent(getBotonFirmar(),GroupLayout.PREFERRED_SIZE, 90,GroupLayout.PREFERRED_SIZE).

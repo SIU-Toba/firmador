@@ -95,7 +95,7 @@ class firmador_pdf
         <html>
         <body>
         <applet  code="ar/gob/onti/firmador/view/FirmaApplet" 	 
-           archive="firmador.jar"  width="700"	height="410" >
+           archive="firmador.jar"  width="700"	height="310" >
          <param  name="URL_DESCARGA"	 value="<?php echo $url_actual; ?>?accion=descargar" >
          <param  name="URL_SUBIR"	value="<?php echo $url_actual; ?>?accion=subir">
          <param  name="MOTIVO"  value="Insertar motivo de la firma">
