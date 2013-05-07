@@ -344,7 +344,7 @@ public class FirmaControler {
 	public void descargarDocumentoParaFirmar (Container container) {
 		HttpFileDownLoader fileDown = new HttpFileDownLoader();
 		String url=agregarParametroUrl(container,mainWindow.getSignProps().getDownloadURL(),fileDown);
-
+                System.out.println("Downloading from " + url);
 		if (url.startsWith("http://") || url.startsWith("https://")) {
 			if (fileDown.connectURL(url)) {			
 				try {
@@ -363,6 +363,7 @@ public class FirmaControler {
 						}
 					}
 				} catch (IOException e) {
+                                        e.printStackTrace();
 					mostrarMensajesError(container, myProps.getString("errorDescargarDoc")+ fileDown.getHttpFileError(), e);
 				}
 			}

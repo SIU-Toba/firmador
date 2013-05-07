@@ -13,6 +13,7 @@ import ar.gob.onti.firmador.model.PropsConfig;
 import ar.gob.onti.firmador.model.Proxy;
 
 import com.sun.java.browser.net.ProxyService;
+import java.net.URI;
 
 
 public class HttpFileConnection  {
@@ -59,11 +60,14 @@ public class HttpFileConnection  {
 				connectURL = (HttpURLConnection)tmpUrl.openConnection(HttpFileConnection.createProxy(proxy));
 				retValue = true;
 			} catch (MalformedURLException e) {
+                                e.printStackTrace();
 				cargarMensajeError(e,urlString);
 			} 
 			catch (IOException e) {
+                                e.printStackTrace();
 				cargarMensajeError(e,urlString);
 			} catch (URISyntaxException e) {
+                                e.printStackTrace();
 				cargarMensajeError(e,urlString);
 			}
 		return retValue;

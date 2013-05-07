@@ -160,7 +160,7 @@
                     <phase>install</phase>
                     <configuration>
                       <tasks>
-                        <copy file="target/FirmaApplet-1.0-jar-with-dependencies.jar" tofile="sample/firmador.jar"/>
+                        <copy file="target/FirmaApplet-1.0-jar-with-dependencies.jar" tofile="sample/www/firmador.jar"/>
                       </tasks>
                     </configuration>
                     <goals>
