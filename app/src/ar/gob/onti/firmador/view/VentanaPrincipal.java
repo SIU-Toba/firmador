@@ -30,6 +30,8 @@ import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
+import java.applet.Applet;
+import netscape.javascript.*; // add plugin.jar to classpath during compilation
 
 import ar.gob.onti.firmador.controler.FileSystem;
 import ar.gob.onti.firmador.controler.FirmaControler;
@@ -300,7 +302,14 @@ public class VentanaPrincipal  {
 						
 							panelPrincipal.setVisible(false);
 							container.add(panelFirmaExitosa);
-						
+                                                        
+                                                        try {
+                                                            JSObject window = JSObject.getWindow((Applet) container);
+                                                            window.call("firmaOk", new Object[] {})   ;
+                                                        } catch (Exception e) {
+                                                            e.printStackTrace();
+                                                        }
+
 					}
 				}
 			}
