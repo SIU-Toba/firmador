@@ -26,23 +26,7 @@ class firmador_pdf
         header("Expires: 0");
     }
     
-    function generar_applet()
-    {
-        $url_actual = $this->get_url_base_actual(). $_SERVER['REQUEST_URI'];
-        $sesion = $this->generar_sesion();
-?>
-        <applet  code="ar/gob/onti/firmador/view/FirmaApplet" 	 
-           archive="firmador.jar"  width="700"	height="310" >
-         <param  name="URL_DESCARGA"	 value="<?php echo $url_actual; ?>?accion=descargar" >
-         <param  name="URL_SUBIR"	value="<?php echo $url_actual; ?>?accion=subir">
-         <param  name="MOTIVO"  value="Insertar motivo de la firma">
-         <param  name="CODIGO"  value="<?php echo $sesion; ?>" />
-         <param name="PREGUNTAS" value='{ "preguntasRespuestas": []}' />
-        </applet>
-<?php
-     }
-     
-
+   
    function get_url_base_actual() 
    {
         $s = empty($_SERVER["HTTPS"]) ? '' : ($_SERVER["HTTPS"] == "on") ? "s" : "";
