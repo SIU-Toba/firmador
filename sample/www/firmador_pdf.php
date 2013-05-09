@@ -50,7 +50,7 @@ class firmador_pdf
 			if ($this->db == null) {
 				$archivo_sesiones = dirname(dirname(__FILE__)).'/sesiones.xml';
 				if (file_exists($archivo_sesiones)) {
-					$xml = simplexml_load_file('sesiones.xml');
+					$xml = simplexml_load_file($archivo_sesiones);
 				} else {
 					$string = <<<XML
 <?xml version='1.0'?> 
@@ -80,7 +80,7 @@ XML;
         if ($this->db == null) {
             $archivo_sesiones = dirname(dirname(__FILE__)).'/sesiones.xml';
             if (file_exists($archivo_sesiones)) {
-                $xml = simplexml_load_file('sesiones.xml');
+                $xml = simplexml_load_file($archivo_sesiones);
             } else {
                 die("No hay sesiones registradas");
             }
