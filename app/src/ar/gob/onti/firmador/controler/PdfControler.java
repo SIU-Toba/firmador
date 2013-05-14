@@ -275,7 +275,10 @@ public class PdfControler {
 				} 
 
 			}
-			
+			if (! currentKeyStoreData.validarCertificateChain()) {
+                            signError+=PropsConfig.getInstance().getString("errorValidarCertChain")+" ";
+                            return false;
+                        }
 			if (validateOCSP) {
 				if (!currentKeyStoreData.validarCertificadoOCSP()) {
 					signError+=PropsConfig.getInstance().getString("errorCertRevocado")+" ";
@@ -285,12 +288,14 @@ public class PdfControler {
 				}
 			}
 		}catch (Exception e) {
+                        e.printStackTrace();
 			cargarMensajeDeError(PropsConfig.getInstance().getString("errorvalidarCRL"), "validarCRL", e);
 			loguearExcepcion(e);
 			return false;
 		}
 		return true;
 	}
+
 	/**
 	 * 
 	 * @param signConfig

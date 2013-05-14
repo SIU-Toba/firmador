@@ -29,6 +29,27 @@ import ar.gob.onti.firmador.model.PropsConfig;
 import ar.gob.onti.firmador.util.HexUtils;
 
 import com.itextpdf.text.pdf.PdfPKCS7;
+import java.io.File;
+import java.io.InputStream;
+import java.net.URISyntaxException;
+import java.net.URL;
+import java.net.URLDecoder;
+import java.security.InvalidAlgorithmParameterException;
+import java.security.InvalidKeyException;
+import java.security.NoSuchProviderException;
+import java.security.PublicKey;
+import java.security.SignatureException;
+import java.security.cert.CertPath;
+import java.security.cert.CertPathValidator;
+import java.security.cert.PKIXParameters;
+import java.security.cert.TrustAnchor;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Enumeration;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 public class KeyStoreData {
 	private KeyStore keyStore;
@@ -218,5 +239,128 @@ public class KeyStoreData {
 			return false;
 		}		
 	}
+        
+                
+        public boolean validarCertificateChain() {
+           ClassLoader cl = this.getClass().getClassLoader();
+            try {
+                CertificateFactory cf = CertificateFactory.getInstance("X.509");
+                ArrayList<X509Certificate> trustedCerts = new ArrayList<X509Certificate>();
+                InputStream res;
+                int nivel = 0;
+                do {
+                    res = cl.getResourceAsStream("trusted-certificates/Nivel" + nivel + ".crt");
+                    if (res != null) {
+                        X509Certificate cert = (X509Certificate) cf.generateCertificate(res);
+                        trustedCerts.add(cert);
+                    } 
+                    nivel++;
+                } while (res != null);
+                        
+                for (int i = 0; i < chain.length; i++) {
+                    X509Certificate cert = (X509Certificate) chain[i];
+                    try {
+                        //System.out.println("i" + i + ": "+ cert.toString());
+                        if (!validateKeyChain(cert, trustedCerts)) {
+                            return false;
+                        }
+                    } catch (InvalidAlgorithmParameterException ex) {
+                        ex.printStackTrace();
+                        return false;
+                    } catch (NoSuchAlgorithmException ex) {
+                        ex.printStackTrace();
+                        return false;
+                    } catch (NoSuchProviderException ex) {
+                        ex.printStackTrace();
+                        return false;
+                    }
+                }
+                return true; 
+            } catch (CertificateException ex) {
+                ex.printStackTrace();
+                return false;
+            }
+        }
+        
+    /**
+     * Validate keychain
+     * @param client is the client X509Certificate
+     * @param trustedCerts is Array containing all trusted X509Certificate
+     * @return true if validation until root certificate success, false otherwise
+     * @throws CertificateException
+     * @throws InvalidAlgorithmParameterException
+     * @throws NoSuchAlgorithmException
+     * @throws NoSuchProviderException
+     */
+    private static boolean validateKeyChain(X509Certificate client,
+            ArrayList<X509Certificate> trustedCerts) throws CertificateException,
+            InvalidAlgorithmParameterException, NoSuchAlgorithmException,
+            NoSuchProviderException {
+        boolean found = false;
+        int i = trustedCerts.size();
+        CertificateFactory cf = CertificateFactory.getInstance("X.509");
+        TrustAnchor anchor;
+        Set anchors;
+        CertPath path;
+        List list;
+        PKIXParameters params;
+        CertPathValidator validator = CertPathValidator.getInstance("PKIX");
+ 
+        while (!found && i > 0) {
+            anchor = new TrustAnchor(trustedCerts.get(--i), null);
+            anchors = Collections.singleton(anchor);
+ 
+            list = Arrays.asList(new Certificate[] { client });
+            path = cf.generateCertPath(list);
+ 
+            params = new PKIXParameters(anchors);
+            params.setRevocationEnabled(false);
+ 
+            if (client.getIssuerDN().equals(trustedCerts.get(i).getSubjectDN())) {
+                try {
+                    validator.validate(path, params);
+                    if (isSelfSigned(trustedCerts.get(i))) {
+                        // found root ca
+                        found = true;
+                        System.out.println("validating root" + trustedCerts.get(i).getSubjectX500Principal().getName());
+                    } else if (!client.equals(trustedCerts.get(i))) {
+                        // find parent ca
+                        System.out.println("validating via:" + trustedCerts.get(i).getSubjectX500Principal().getName());
+                        found = validateKeyChain(trustedCerts.get(i), trustedCerts);
+                    }
+                } catch (CertPathValidatorException e) {
+                    // validation fail, check next certifiacet in the trustedCerts array
+                    e.printStackTrace();
+                }
+            }
+        }
+ 
+        return found;
+    }
+    
+    /**
+     *
+     * @param cert is X509Certificate that will be tested
+     * @return true if cert is self signed, false otherwise
+     * @throws CertificateException
+     * @throws NoSuchAlgorithmException
+     * @throws NoSuchProviderException
+     */
+    private static boolean isSelfSigned(X509Certificate cert)
+            throws CertificateException, NoSuchAlgorithmException,
+            NoSuchProviderException {
+        try {
+            PublicKey key = cert.getPublicKey();
+ 
+            cert.verify(key);
+            return true;
+        } catch (SignatureException sigEx) {
+            return false;
+        } catch (InvalidKeyException keyEx) {
+            return false;
+        }
+    }
+    
+  
 	
 }
