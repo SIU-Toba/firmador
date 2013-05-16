@@ -242,21 +242,25 @@ public class KeyStoreData {
         
                 
         public boolean validarCertificateChain() {
+           List<String> trusted = PropsConfig.getInstance().getTrustedCertificates();
+           if (trusted.isEmpty()) {
+               return true; //Trust all
+           }
            ClassLoader cl = this.getClass().getClassLoader();
             try {
                 CertificateFactory cf = CertificateFactory.getInstance("X.509");
                 ArrayList<X509Certificate> trustedCerts = new ArrayList<X509Certificate>();
                 InputStream res;
-                int nivel = 0;
-                do {
-                    res = cl.getResourceAsStream("trusted-certificates/Nivel" + nivel + ".crt");
-                    if (res != null) {
-                        X509Certificate cert = (X509Certificate) cf.generateCertificate(res);
-                        trustedCerts.add(cert);
-                    } 
-                    nivel++;
-                } while (res != null);
-                        
+                for (int i = 0; i < trusted.size(); i++) {
+                    res = cl.getResourceAsStream("trusted-certificates/" + trusted.get(i) + ".crt");
+                    if (res == null) {
+			signError += "\r\nTrusted certificate no encontrado: " + trusted.get(i);
+                        return false;
+                    }
+                    X509Certificate cert = (X509Certificate) cf.generateCertificate(res);
+                    trustedCerts.add(cert);
+                }
+   
                 for (int i = 0; i < chain.length; i++) {
                     X509Certificate cert = (X509Certificate) chain[i];
                     try {

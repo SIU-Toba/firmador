@@ -40,6 +40,8 @@ public final class PropsConfig {
 	private String tipoArchivo = "";
 	//Autoridades certificantes
 	private List<String> autoCertificantes;
+        private List<String> trustedCertificates;
+
 	private Map<String, String> mapaDatosUsuarioFirma;
 	// Conexion servidor
 	private String uploadURL = "";
@@ -113,7 +115,9 @@ public final class PropsConfig {
 		return autoCertificantes;
 	}
 
-	
+        public List<String> getTrustedCertificates() {
+		return trustedCertificates;
+	}
 
 	public String getSourceDir() {
 		return sourceDir;
@@ -190,6 +194,7 @@ public final class PropsConfig {
 		downloadURL = "";
 		propsError = "";
 		autoCertificantes= new ArrayList<String>();
+                trustedCertificates = new ArrayList<String>();
 		this.myProps = ResourceBundle.getBundle("properties.firma",new Locale("es","AR"));
 
 	}
@@ -216,6 +221,26 @@ public final class PropsConfig {
 			autoCertificantes.add(itera-1, "*");
 		}
 	}
+        
+        /**
+	 *  Configuracion trusted certificates
+	 *  Si no se especifico ninguno se aceptan todas
+	 */
+	public void cargarTrustedCertificates(){
+		String readProperty="";
+		String certificate="";
+		int itera = 1;
+		while (true) {
+			readProperty = "trustedCertificates" + itera;
+			if (!myProps.containsKey(readProperty)) {
+				break;
+			}
+			certificate = myProps.getString(readProperty).trim();
+			trustedCertificates.add(itera-1, certificate);
+			itera++;
+		}
+	}
+        
 	/**
 	 * carga el directorio temporal donde se almacenaran los archvos 
 	 * para eralizar la firma del documento
@@ -238,6 +263,7 @@ public final class PropsConfig {
 		try {
             cargarDirectorioTemporal();
             cargarIssuers();
+            cargarTrustedCertificates();
             this.visible=true;
 			uplBoundary = myProps.getString("UploadBoundary").trim();
 			this.mapaDatosUsuarioFirma= new HashMap<String, String>();
