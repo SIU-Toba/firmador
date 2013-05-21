@@ -49,6 +49,7 @@ public class VentanaPrincipal  {
 	private JPanel panelPrincipal =null;
 	private PanelPrincipal panelFirmaExitosa=null;
 	private JLabel labelTitulo;
+	private JLabel labelIconoProcesando;
 	private JLabel labelIconoOk;
 	private JButton botonSubirPdf;
 	private JButton botonFlechaDerecha;
@@ -68,9 +69,10 @@ public class VentanaPrincipal  {
 	private ImageIcon visualizarIcon = null;
 	private ImageIcon flechaIcon = null;
 	private ImageIcon firmarIcon =  null;
-	private ImageIcon tituloIcon =  null;
+	private ImageIcon tituloIcon =  null;	
 	private ImageIcon okIcon =  null;
 	private ImageIcon ayudaIcon =  null;
+	private ImageIcon procesandoIcon =  null;
 	private String idApplicacion;
 	private String codigo;
 	private String objetoDominio;
@@ -204,6 +206,7 @@ public class VentanaPrincipal  {
 		firmarIcon =  new ImageIcon(cl.getResource("images/sign.png"));
 		tituloIcon =  new ImageIcon(cl.getResource("images/Logosiu1.png"));
 		ayudaIcon =  new ImageIcon(cl.getResource("images/Help-32.png"));
+		procesandoIcon =  new ImageIcon(cl.getResource("images/button_loading.gif"));
 		flechaIcon =  new ImageIcon(cl.getResource("images/flecha-derecha.png"));
 		okIcon =  new ImageIcon(cl.getResource("images/ok.png"));
 		crearGroupLayout();
@@ -271,6 +274,18 @@ public class VentanaPrincipal  {
 		}
 		return labelTitulo;
 	}
+
+	/**
+	 *  Git animado "procesando" para indicar puntos de procesamiento
+	 * @return
+	 */
+	public JLabel getIconoProcesando() {
+		if(labelIconoProcesando==null){
+			labelIconoProcesando = new JLabel(procesandoIcon);
+		}
+		return labelIconoProcesando;
+	}
+	
 	/**
 	 * Boton encargado de recibir el evento de subir el pdf al servidor
 	 * @return
@@ -413,6 +428,8 @@ public class VentanaPrincipal  {
 				{	
 					botonFirmar.addActionListener(new java.awt.event.ActionListener() {
 						public void actionPerformed(java.awt.event.ActionEvent evt) {
+							//Muestra gif procesando							
+							labelIconoProcesando.setVisible(true);							
 							firmaControler.firmarDocumento(container);
 						}
 					});
@@ -456,6 +473,8 @@ public class VentanaPrincipal  {
 										addComponent(getBotonVerPdf(),GroupLayout.PREFERRED_SIZE, 200,GroupLayout.PREFERRED_SIZE).
 										//addGap(100,100,100).
 										//addComponent(getBotonAyuda(),GroupLayout.PREFERRED_SIZE, 80,GroupLayout.PREFERRED_SIZE).
+										addGap(100,100,100).
+										addComponent(getIconoProcesando(),GroupLayout.PREFERRED_SIZE, 72,GroupLayout.PREFERRED_SIZE).
 										addGap(20,20,20))					
 		);
 
@@ -474,15 +493,15 @@ public class VentanaPrincipal  {
 						).
 						addGap(50,50,50).
 						addGroup(myLayout.createParallelGroup(GroupLayout.Alignment.BASELINE).
-								addComponent(getBotonVerPdf(),GroupLayout.PREFERRED_SIZE, 40,GroupLayout.PREFERRED_SIZE)
-
+								addComponent(getBotonVerPdf(),GroupLayout.PREFERRED_SIZE, 40,GroupLayout.PREFERRED_SIZE).
 								//addComponent(getBotonAyuda(),GroupLayout.PREFERRED_SIZE, 40,GroupLayout.PREFERRED_SIZE)
-								)
+								addComponent(getIconoProcesando(),GroupLayout.PREFERRED_SIZE, 80,GroupLayout.PREFERRED_SIZE))
+								
 
 
 		);
-
-
+		//Se oculta el gif procesando
+		labelIconoProcesando.setVisible(false);	
 
 	}
 
@@ -499,6 +518,9 @@ public class VentanaPrincipal  {
 			botonFirmar.setEnabled(false);
 			botonSubirPdf.setEnabled(false);
 		} else if (operation.equals("firmaDocOk")) {
+			//Se oculta gif procesando
+			labelIconoProcesando.setVisible(false);		
+			
 			botonFirmar.setEnabled(false);//false
 			botonSubirPdf.setEnabled(true);
 		} else if (operation.equals("subidaDocOk")) {
