@@ -25,6 +25,7 @@ import ar.gob.onti.firmador.controler.PdfControler.OriginType;
 import ar.gob.onti.firmador.model.certificatelist.ComparatorAliasCert;
 
 import com.itextpdf.text.pdf.PdfPKCS7;
+import java.math.BigInteger;
 
 public class StoreDctnry {
 
@@ -128,6 +129,7 @@ public class StoreDctnry {
 		String nroSerie= "";
 		String datCaducidad= "";
 		int index;
+		ArrayList<BigInteger> serials = new ArrayList<BigInteger>();
 		for(int n = 0; n < keyStrToken.length; n++) {
 			Enumeration<String> aliasEnm = keyStrToken[n].aliases();
 			for (; aliasEnm.hasMoreElements();) {
@@ -140,6 +142,10 @@ public class StoreDctnry {
 					continue;
 				}
 				cerONTI = (X509Certificate) cerKeyStore;
+				if (serials.contains(cerONTI.getSerialNumber())) {
+					continue;   //Avoid to add the same serial# twice
+				}
+                serials.add(cerONTI.getSerialNumber());
 				issuerCN= PdfPKCS7.getIssuerFields(cerONTI).getField("CN");
 	
 				index = issuers.indexOf(issuerCN);
@@ -161,7 +167,7 @@ public class StoreDctnry {
 				Date lowDate = cerONTI.getNotBefore();
 				Date now = new Date();
 				if ((now.getTime() >= lowDate.getTime()) && (now.getTime() <= upDate.getTime())) {
-					// Si todo OK, entonces se agrega al diccionario 
+					// Si todo OK, entonces se agrega al diccionario
 					addAlias(issuerCN, subjCN, nroSerie, datCaducidad, aliasCer, OriginType.values()[n]);
 				}  
 			}
