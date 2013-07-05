@@ -58,13 +58,18 @@ if ($_GET['accion'] == 'subir') {
 		header('HTTP/1.1 500 Internal Server Error');
 		die("Codigo invalido");   
 	}
+	if ($_FILES["md5_fileSigned"]["error"] != UPLOAD_ERR_OK) {
+		error_log("Error uploading file");
+		header('HTTP/1.1 500 Internal Server Error');
+		die;
+	}	
 	$path = $_FILES['md5_fileSigned']['tmp_name'];
-        $destino = dirname(dirname(__FILE__)).'/docFirmado.pdf';
-        if (! move_uploaded_file($path, $destino)) {
-            error_log("Error uploading file");
-            header('HTTP/1.1 500 Internal Server Error');
-            die;
-        }
+	$destino = dirname(dirname(__FILE__)).'/docFirmado.pdf';
+	if (! move_uploaded_file($path, $destino)) {
+		error_log("Error uploading file");
+		header('HTTP/1.1 500 Internal Server Error');
+		die;
+	}
 
 	die;
 }

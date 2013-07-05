@@ -139,7 +139,7 @@ public class PdfControler {
 	}
 	/**
 	 * Se verifica si el certificado encontrado emitido
-	 *  por la AC Raíz de la ONTI está vigente
+	 *  por la AC RaÃ­z de la ONTI estÃ¡ vigente
 	 * @param certificado
 	 * @return
 	 */
@@ -314,7 +314,7 @@ public class PdfControler {
 	 */
 	public void setLogFile(Logger logFile) throws FileNotFoundException {
 		if (logFile == null) {
-			throw new FileNotFoundException("Archivo de configuración no inicializado");	
+			throw new FileNotFoundException("Archivo de configuraciÃ³n no inicializado");	
 		} else {
 			pdfLogFile = logFile;
 		}	
@@ -438,12 +438,12 @@ public class PdfControler {
 		Mozilla mzFirefox = new Mozilla();
 		signError +=PropsConfig.getInstance().getString("errorAlmacenFirefox") ;
 
-		//-- Cargar las librerías de Mozilla (sólo para Windows)
+		//-- Cargar las librerÃ­as de Mozilla (sÃ³lo para Windows)
 		try {
 			mzFirefox.loadMozillaLibraries();
 		} catch (Throwable e) {
-			System.out.println("[MozillaKeyStoreManager.initKeystores]::No se han podido cargar las librerías para Mozilla Firefox " + e.getMessage());
-			//throw new MozillaKeyStoreException("No se han podido cargar las librerías para Mozilla Firefox", e);
+			System.out.println("[MozillaKeyStoreManager.initKeystores]::No se han podido cargar las librerÃ­as para Mozilla Firefox " + e.getMessage());
+			//throw new MozillaKeyStoreException("No se han podido cargar las librerÃ­as para Mozilla Firefox", e);
 		}
 
 		String[] providers = new String[1];
@@ -454,12 +454,12 @@ public class PdfControler {
 		ChromeLinux mzChromeLinux = new ChromeLinux();
 		signError +=PropsConfig.getInstance().getString("errorAlmacenChromeLinux");
 
-		//-- Cargar las librerías de Chrome (sólo para Linux)
+		//-- Cargar las librerÃ­as de Chrome (sÃ³lo para Linux)
 		try {
 			mzChromeLinux.loadChromeLibraries();
 		} catch (Throwable e) {
-			System.out.println("[ChromeLinuxKeyStoreManager.initKeystores]::No se han podido cargar las librerías para Chrome " + e.getMessage());
-			//throw new MozillaKeyStoreException("No se han podido cargar las librerías para Mozilla Firefox", e);
+			System.out.println("[ChromeLinuxKeyStoreManager.initKeystores]::No se han podido cargar las librerÃ­as para Chrome " + e.getMessage());
+			//throw new MozillaKeyStoreException("No se han podido cargar las librerÃ­as para Mozilla Firefox", e);
 		}
 
 		String[] providers = new String[1];
@@ -603,7 +603,7 @@ public class PdfControler {
 			signError += mensajeDeError;
 		}
 		if (errOpera.length() > 0) {
-			signError += "\r\nOperación " + errOpera;
+			signError += "\r\nOperaciÃ³n " + errOpera;
 		}
 		if (e.getMessage() != null) {
 			signError += "\r\nMensaje JVM: " + e.getMessage();
@@ -613,7 +613,7 @@ public class PdfControler {
 		}
 	}
 	/**
-	 * Se aplica una firma digital a un documento,  posiblemente como una nueva revisión, 
+	 * Se aplica una firma digital a un documento,  posiblemente como una nueva revisiÃ³n, 
 	 * lo que hace posible varias firmas. si retorna null es que el docuemnto no tiene
 	 * firmas previas entonces se cera una instancia sin firmas previas sino es que el pdf
 	 * tiene firmas previas entonces se agregara a la existente la nuevo firma
@@ -750,12 +750,14 @@ public class PdfControler {
 			errOpera = "(PdfSignatureAppearence.setAbsolutePosition)";
 	        PdfContentByte add_watermark;            
 			errOpera = "(PdfSignatureAppearence.number_of_pages)";
+
+            Image watermark_image = Image.getInstance(cl.getResource("images/watermark.png"));
 	        while (i < number_of_pages) {
 	          i++;
 	          add_watermark = stp.getOverContent(i);
  			  Rectangle size = reader.getPageSize(i);
  		      errOpera = "(PdfSignatureAppearence.Image)";
- 	          Image watermark_image = Image.getInstance(cl.getResource("images/watermark.png"));
+
 
  	          for (int y = 0; y < size.getHeight(); y += watermark_image.getHeight()) {
  	        	  for (int x = 0; x < size.getWidth(); x += watermark_image.getWidth()) {
