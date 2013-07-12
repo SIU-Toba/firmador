@@ -31,11 +31,13 @@ import org.apache.commons.httpclient.methods.multipart.FilePart;
 import org.apache.commons.httpclient.methods.multipart.MultipartRequestEntity;
 import org.apache.commons.httpclient.methods.multipart.Part;
 import org.apache.commons.httpclient.methods.multipart.StringPart;
+
 import org.apache.http.HttpResponse;
 import org.apache.http.entity.mime.MultipartEntity;
 import org.apache.http.entity.mime.content.FileBody;
 import org.apache.http.entity.mime.content.StringBody;
 import org.apache.http.impl.client.DefaultHttpClient;
+
 
 import ar.gob.onti.firmador.model.PropsConfig;
 
@@ -176,7 +178,7 @@ public class HttpFileUploader extends HttpFileConnection {
 	 * @return
 	 * @throws IOException 
 	 */
-	public boolean doUpload(String fileName, PropsConfig myProps,String codigo,String objetoDominio,String tipoArchivo) throws IOException {
+	public boolean doUpload(String fileName, PropsConfig myProps,String codigo,String objetoDominio,String tipoArchivo, String cookie) throws IOException {
 		String errorBuffer="";
 
 		try {			
@@ -191,6 +193,11 @@ public class HttpFileUploader extends HttpFileConnection {
 			HttpClient client = new HttpClient();
 	        client.getHttpConnectionManager().
 	                getParams().setConnectionTimeout(5000);
+
+			if (cookie != null && cookie.length() > 0) {
+				post.setRequestHeader("Cookie", cookie);
+			}
+
 	        int status = client.executeMethod(post);
 	        if (status != 200) {
 				errorBuffer+="Error de recepción en el server status" + status;

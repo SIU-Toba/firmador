@@ -50,11 +50,13 @@ public class FirmaApplet extends JApplet{
 	public static final String CHROME_LINUX = "CHROME_LINUX";
 	public static final String LINUX_MAC = "LINUX_MAC";
 	
+	
 	/**
 	 * Metodo principal del Applet a partir del cual el este se 
 	 * inicializa y  se ejecutara
 	 */
 	public void init() {
+		
 		System.setProperty("java.net.useSystemProxies","true");
 		String browser=getBrowser();
 		
@@ -71,6 +73,7 @@ public class FirmaApplet extends JApplet{
 		String userName = this.getParameter("USERNAME");
 		String objetoDominio = this.getParameter("ID_OBJETO_DOMINIO");
 		String tipoArchivo = this.getParameter("TIPO_ARCHIVO");
+		String cookie = this.getParameter("COOKIE");
 		
 		PreguntasRespuestas preguntas = new PreguntasRespuestas();
 		preguntas.parse(URLDecoder.decode(this.getParameter("PREGUNTAS")));
@@ -82,6 +85,7 @@ public class FirmaApplet extends JApplet{
 		myMainWin.setCodigo(codigo);
 		myMainWin.setObjetoDominio(objetoDominio);
 		myMainWin.setTipoArchivo(tipoArchivo);
+		myMainWin.setCookie(cookie);
 		PropsConfig config= myMainWin.getSignProps();
 		config.setNombreArchivo(nombreArchivo);
 		config.setUploadURL(uploadURL);

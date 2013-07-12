@@ -309,7 +309,12 @@ public class FirmaControler {
 		try {
 			if (fileUp.connectURL(mainWindow.getSignProps().getUploadURL())) {
 
-				if (fileUp.doUpload(mainWindow.getArchivoFirmado().getPath(),mainWindow.getSignProps(), mainWindow.getCodigo(), mainWindow.getObjetoDominio(), mainWindow.getTipoArchivo()) ) {
+				if (fileUp.doUpload(mainWindow.getArchivoFirmado().getPath(),
+										mainWindow.getSignProps(), 
+										mainWindow.getCodigo(), 
+										mainWindow.getObjetoDominio(), 
+										mainWindow.getTipoArchivo(),
+										mainWindow.getCookie()) ) {
 					//mostrarMensajesOk(container, myProps.getString("archivoEnviadoExtosamente"),  myProps.getString("envioDictamenes"));
 					return true;
 				} else {
@@ -348,7 +353,7 @@ public class FirmaControler {
 		if (url.startsWith("http://") || url.startsWith("https://")) {
 			if (fileDown.connectURL(url)) {			
 				try {
-					if (!fileDown.doDownload(mainWindow.getSignProps().getSourceDir(),fileDown.getLocalFileName())) {
+					if (!fileDown.doDownload(mainWindow.getSignProps().getSourceDir(),fileDown.getLocalFileName(), mainWindow.getCookie())) {
 						mostrarMensajesError(container, myProps.getString("errorDescargarDoc")+ fileDown.getHttpFileError(), null);
 						mainWindow.setCtrls("errorDescarga");
 						return;

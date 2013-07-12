@@ -10,6 +10,7 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.HttpURLConnection;
 
 
 public class HttpFileDownLoader extends HttpFileConnection{
@@ -48,7 +49,7 @@ public class HttpFileDownLoader extends HttpFileConnection{
 	 * @return
 	 * @throws IOException 
 	 */
-	public boolean doDownload(String srcDirectory,String nombreArchivo) throws IOException {
+	public boolean doDownload(String srcDirectory,String nombreArchivo, String cookie) throws IOException {
 		localFileName=nombreArchivo;
 		BufferedOutputStream outStream = null;
 		InputStream  inStream = null;
@@ -56,7 +57,12 @@ public class HttpFileDownLoader extends HttpFileConnection{
 		String downloadError= "";
 
 		try {
-			inStream = getConnectURL().getInputStream();
+			HttpURLConnection httpconn = getConnectURL();
+			if (cookie != null && cookie.length() > 0) {
+				httpconn.setRequestProperty("Cookie", cookie);
+			}
+
+			inStream = httpconn.getInputStream();
 			stream=new FileOutputStream(srcDirectory + File.separator + localFileName);
 			outStream = new BufferedOutputStream(stream);
 			byte[] buffer = new byte[1024];

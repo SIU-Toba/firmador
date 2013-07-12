@@ -79,6 +79,8 @@ public class VentanaPrincipal  {
 	private String tipoArchivo;
 	private String letra="Arial";
 	private String color="#ffffff";
+	private String cookie;
+	
 	/**
 	 * Controlador que se encarga de manejar las acciones que realiza el usuario
 	 * @return
@@ -125,6 +127,14 @@ public class VentanaPrincipal  {
 	public void setCodigo(String codigo) {
 		this.codigo = codigo;
 	}
+	
+	public void setCookie(String cookie) {
+		this.cookie = cookie;
+	}
+
+	public String getCookie() {
+		return cookie;
+	}
 
 	/**
 	 * Objeto Dominio que recibe el Applet de la aplicaion que lo esta jecutando
@@ -135,7 +145,6 @@ public class VentanaPrincipal  {
 	}
 
 	/**
-	 * 
 	 * @param objetoDominio
 	 */
 	public void setObjetoDominio(String objetoDominio) {
