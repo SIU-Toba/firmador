@@ -107,12 +107,15 @@ public class FirmaControler {
 		}
 		try {
 			if (firmarDocumentoPdf(container)) {
+					FileSystem.getInstance().borrarArchivo(mainWindow.getArchivoParaFirmar().getPath()); 
 					mainWindow.setArchivoParaFirmar(null);
 					mainWindow.setCtrls("firmaDocOk");
-					FileSystem.getInstance().borrarArchivo(mainWindow.getArchivoParaFirmar().getPath()); 
+			} else {
+					mainWindow.setCtrls("firmaDocError");
 			}
 		} catch (Exception e) {
-			//mostrarMensajesError(container,myProps.getString("errorEliminandoSinFirmar"), e);
+			e.printStackTrace();
+			mostrarMensajesError(container,myProps.getString("errorEliminandoSinFirmar"), e);
 		}
 	}
 	/**
@@ -137,6 +140,7 @@ public class FirmaControler {
 					mainWindow.setCtrls("subidaDocOk");
 				}	
 			} catch (IllegalArgumentException e) {
+				e.printStackTrace();
 				mostrarMensajesError(container,myProps.getString("errorEliminandoFirmado"), e);
 			}
 			return true;

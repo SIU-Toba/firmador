@@ -1,0 +1,28 @@
+1. Instalar los pre-requisitos presentes en el  README
+
+2. Por unica vez generar el keystore para autofirmar el mismo applet
+
+	keytool -genkey -keyalg rsa -alias key -keystore keystore.jks
+	#Por ej usar ''password'' como contraseña
+
+3. Configurar app/resource/properties/firma.properties , agregando o quitando CNs y certificados de confianza
+
+	...
+	IssuerCN4=COMODO Client Authentication and Secure Email CA
+	...
+	trustedCertificates1=COMODO Client Authentication and Secure
+	...
+
+
+4. En cada sesión de compilación, ejecutar
+
+	export FIRMADOR_STORE=keystore.jks
+	export FIRMADOR_ALIAS=key
+	export FIRMADOR_STOREPASS=password
+	export FIRMADOR_KEYPASS=password
+
+5. Compilar en modo 'producción' (sin eso no va a permitir realizar la firma en sí)
+
+	mvn clean compile install -DFIRMADOR_PROD
+
+

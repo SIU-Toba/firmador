@@ -46,9 +46,6 @@ public final class FileSystem {
 		//Se asegura que no este protegido contra escritura
 		if (fileDel.canWrite()) {
 			retValue = fileDel.delete();
-			if (!retValue) {
-				throw new IllegalArgumentException("MainWindow.deleteFile(): "+PropsConfig.getInstance().getString("errorFalloBorrado")+"");
-			}
 		} 
 		return retValue;
 	}

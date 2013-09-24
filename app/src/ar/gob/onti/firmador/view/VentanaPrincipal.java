@@ -37,6 +37,8 @@ import ar.gob.onti.firmador.controler.FileSystem;
 import ar.gob.onti.firmador.controler.FirmaControler;
 import ar.gob.onti.firmador.controler.PdfControler;
 import ar.gob.onti.firmador.model.PropsConfig;
+import java.awt.Dimension;
+import javax.swing.JProgressBar;
 /**
  * Clase contenedora de los componetes de la Applicacion
  * @author ocaceres
@@ -48,14 +50,16 @@ public class VentanaPrincipal  {
 	private JLabel mensajeFirmaOk;
 	private JPanel panelPrincipal =null;
 	private PanelPrincipal panelFirmaExitosa=null;
+	private JPanel panelProgress;
+
 	private JLabel labelTitulo;
-	private JLabel labelIconoProcesando;
 	private JLabel labelIconoOk;
 	private JButton botonSubirPdf;
 	private JButton botonFlechaDerecha;
 	private JButton botonVerPdf;
+	private JButton botonVerPdfFirmado;
 	private JButton botonFirmar;
-	private JButton botonAyuda;
+	private JProgressBar progressBar;
 	private JTextField certSelecionado;
 	private Container container;
 	private PropsConfig myProps=null;
@@ -72,7 +76,6 @@ public class VentanaPrincipal  {
 	private ImageIcon tituloIcon =  null;	
 	private ImageIcon okIcon =  null;
 	private ImageIcon ayudaIcon =  null;
-	private ImageIcon procesandoIcon =  null;
 	private String idApplicacion;
 	private String codigo;
 	private String objetoDominio;
@@ -205,6 +208,7 @@ public class VentanaPrincipal  {
 		try {
 			pdfControler = new PdfControler();
 		} catch (NoSuchAlgorithmException e) {
+			e.printStackTrace();
 			PropsConfig.getInstance().getAppLogFile().info(e.getMessage());
 		}
 		pdfControler.setProps(PropsConfig.getInstance());
@@ -215,16 +219,19 @@ public class VentanaPrincipal  {
 		firmarIcon =  new ImageIcon(cl.getResource("images/sign.png"));
 		tituloIcon =  new ImageIcon(cl.getResource("images/Logosiu1.png"));
 		ayudaIcon =  new ImageIcon(cl.getResource("images/Help-32.png"));
-		procesandoIcon =  new ImageIcon(cl.getResource("images/button_loading.gif"));
 		flechaIcon =  new ImageIcon(cl.getResource("images/flecha-derecha.png"));
 		okIcon =  new ImageIcon(cl.getResource("images/ok.png"));
+		
 		crearGroupLayout();
+		
 		panelFirmaExitosa= new PanelPrincipal();
 		panelFirmaExitosa.setLayout(new GridLayout(2,1));
 		panelFirmaExitosa.add(getLabelIconoOk());
 		panelFirmaExitosa.add(getMensajeFirmaOk());
-		this.container.add(panelPrincipal);
+
+		container.add(panelPrincipal);
     }
+	
 	/**
 	 * Archivo pdf  que se ha firmado
 	 * @return
@@ -288,11 +295,15 @@ public class VentanaPrincipal  {
 	 *  Git animado "procesando" para indicar puntos de procesamiento
 	 * @return
 	 */
-	public JLabel getIconoProcesando() {
-		if(labelIconoProcesando==null){
-			labelIconoProcesando = new JLabel(procesandoIcon);
+	public JProgressBar getProgressBar() {
+		if(progressBar==null){
+			progressBar = new JProgressBar();
+			progressBar.setIndeterminate(true);
+			progressBar.setStringPainted(true);
+			progressBar.setString("Procesando");
+			//progressBar.setSize(100, 30);
 		}
-		return labelIconoProcesando;
+		return progressBar;
 	}
 	
 	/**
@@ -314,6 +325,7 @@ public class VentanaPrincipal  {
 
 			botonSubirPdf.addActionListener(new java.awt.event.ActionListener() {
 				public void actionPerformed(java.awt.event.ActionEvent evt) {
+					showProgress(myProps.getString("progresoSubiendoArchivo"));
 
 					//int repuesta = JOptionPane.showConfirmDialog(container,
 					//		myProps.getString("mensajeConfirmacionEnvio"),
@@ -323,7 +335,6 @@ public class VentanaPrincipal  {
 					//if original
 					//if(repuesta==0 && firmaControler.subirDocumento(container)){
 					if(firmaControler.subirDocumento(container)){
-						
 							panelPrincipal.setVisible(false);
 							container.add(panelFirmaExitosa);
                                                         
@@ -335,6 +346,7 @@ public class VentanaPrincipal  {
                                                         }
 
 					}
+					hideProgress();
 				}
 			}
 			);
@@ -342,36 +354,6 @@ public class VentanaPrincipal  {
 		return botonSubirPdf;
 	}
 
-
-
-
-
-
-	/**
-	 * Boton encargado de recibir el evento de mostrar la ayuda
-	 * @return
-	 */
-	public JButton getBotonAyuda() {
-		if(botonAyuda==null){
-			botonAyuda = new javax.swing.JButton();
-			botonAyuda.setText(myProps.getString("tituloAyuda"));
-			botonAyuda.setFont(new java.awt.Font(letra, Font.BOLD, 14));
-			botonAyuda.setBackground(Color.decode(color));
-			botonAyuda.setForeground(Color.decode("#888888"));
-			botonAyuda.setBorder(javax.swing.BorderFactory.createLineBorder(Color.decode(color)));
-			botonAyuda.setIcon(ayudaIcon);
-			botonAyuda.addActionListener(new java.awt.event.ActionListener() {
-				public void actionPerformed(java.awt.event.ActionEvent evt) {
-					JOptionPane.showMessageDialog(container,myProps.getString("textoDeAyuda"), myProps.getString("tituloAyuda"), JOptionPane.INFORMATION_MESSAGE,ayudaIcon);
-				}
-			});
-
-
-
-		}
-
-		return botonAyuda;
-	}
 
 
 
@@ -407,16 +389,35 @@ public class VentanaPrincipal  {
 			botonVerPdf.setEnabled(true);
 			botonVerPdf.addActionListener(new java.awt.event.ActionListener() {
 				public void actionPerformed(java.awt.event.ActionEvent evt) {
-					if(FileSystem.getInstance().isExisteArchivo(archivoParaFirmar)){
-						firmaControler.visualizarDocumento(container, archivoParaFirmar);
-					}else{
-						firmaControler.visualizarDocumento(container,archivoFirmado);
-					}
+					firmaControler.visualizarDocumento(container, archivoParaFirmar);
 				}
 			});
 		}
 		return botonVerPdf;
 	}
+	
+		public JButton getBotonVerPdfFirmado() {
+		if(botonVerPdfFirmado ==null){
+			// Operaciones
+			botonVerPdfFirmado = new javax.swing.JButton();
+			botonVerPdfFirmado.setText(myProps.getString("visualizarFirmado"));
+			botonVerPdfFirmado.setFont(new java.awt.Font(letra, Font.BOLD, 14));
+			botonVerPdfFirmado.setIcon(visualizarIcon);
+			botonVerPdfFirmado.setBackground(Color.decode(color));
+			botonVerPdfFirmado.setForeground(Color.decode("#888888"));
+			botonVerPdfFirmado.setBorder(javax.swing.BorderFactory.createLineBorder(Color.decode(color)));
+			//botonVerPdf.setToolTipText("Visualizar el documento seleccionado");
+			botonVerPdfFirmado.setEnabled(false);
+			botonVerPdfFirmado.addActionListener(new java.awt.event.ActionListener() {
+				public void actionPerformed(java.awt.event.ActionEvent evt) {
+					firmaControler.visualizarDocumento(container,archivoFirmado);
+				}
+			});
+		}
+		return botonVerPdfFirmado;
+	}
+	
+		
 	/**
 	 * Boton encargado de recibir el evento de firmar el documento
 	 * @return
@@ -437,8 +438,7 @@ public class VentanaPrincipal  {
 				{	
 					botonFirmar.addActionListener(new java.awt.event.ActionListener() {
 						public void actionPerformed(java.awt.event.ActionEvent evt) {
-							//Muestra gif procesando							
-							labelIconoProcesando.setVisible(true);							
+							showProgress(myProps.getString("progresoAccediendoToken"));
 							firmaControler.firmarDocumento(container);
 						}
 					});
@@ -461,56 +461,54 @@ public class VentanaPrincipal  {
 		panelPrincipal.setBackground(Color.white);
 		panelPrincipal.setForeground(Color.decode("#565656"));
 
+		int marginLeft = 120;
 		myLayout.setHorizontalGroup( 
 				myLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
 
-				.addGroup(myLayout.createSequentialGroup().
-						addGap(15,15,15)
-						.addComponent(getjLblPDFile(),GroupLayout.PREFERRED_SIZE, 360,GroupLayout.PREFERRED_SIZE)
-                				.addComponent(getLabelTitulo()))
+				.addGroup(myLayout.createSequentialGroup()
+						.addGap(10,10,10)
+                		.addComponent(getLabelTitulo(),GroupLayout.PREFERRED_SIZE, 105,GroupLayout.PREFERRED_SIZE)
+						.addGap(10,10,10)
+						.addComponent(getjLblPDFile(),GroupLayout.PREFERRED_SIZE, 200,GroupLayout.PREFERRED_SIZE))
+				.addGroup(myLayout.createSequentialGroup()
+						.addGap(marginLeft,marginLeft,marginLeft)
+						.addComponent(getBotonFirmar(),GroupLayout.PREFERRED_SIZE, 200,GroupLayout.PREFERRED_SIZE)
+						.addGap(70,70,70)
+						.addComponent(getBotonSubirPdf(),GroupLayout.PREFERRED_SIZE, 200,GroupLayout.PREFERRED_SIZE))
+				.addGroup(myLayout.createSequentialGroup()
+						.addGap(marginLeft,marginLeft,marginLeft)
+						.addComponent(getBotonVerPdf(),GroupLayout.PREFERRED_SIZE, 200,GroupLayout.PREFERRED_SIZE)
+						.addGap(70,70,70)
+						.addComponent(getBotonVerPdfFirmado(),GroupLayout.PREFERRED_SIZE, 200,GroupLayout.PREFERRED_SIZE))				
+				.addGroup(myLayout.createSequentialGroup()
+						.addGap(250,250,250)
+						.addComponent(getProgressBar(),GroupLayout.PREFERRED_SIZE, 200,GroupLayout.PREFERRED_SIZE))
+				
 
-						.addGroup(myLayout.createSequentialGroup().
-								addGap(50,50,50).
-								addComponent(getBotonFirmar(),GroupLayout.PREFERRED_SIZE, 200,GroupLayout.PREFERRED_SIZE).
-								//addGap(4,4,4).
-								//addComponent(getBotonFlechaDerecha(),GroupLayout.PREFERRED_SIZE, 50,GroupLayout.PREFERRED_SIZE).
-								addGap(4,4,4).
-								addComponent(getBotonSubirPdf(),GroupLayout.PREFERRED_SIZE, 230,GroupLayout.PREFERRED_SIZE))
-
-								.addGroup(myLayout.createSequentialGroup().
-										addGap(190,190,190).
-										addComponent(getBotonVerPdf(),GroupLayout.PREFERRED_SIZE, 200,GroupLayout.PREFERRED_SIZE).
-										//addGap(100,100,100).
-										//addComponent(getBotonAyuda(),GroupLayout.PREFERRED_SIZE, 80,GroupLayout.PREFERRED_SIZE).
-										addGap(100,100,100).
-										addComponent(getIconoProcesando(),GroupLayout.PREFERRED_SIZE, 72,GroupLayout.PREFERRED_SIZE).
-										addGap(20,20,20))					
 		);
 
 
 		myLayout.setVerticalGroup(myLayout.createSequentialGroup()
 
 				.addGroup(myLayout.createParallelGroup(GroupLayout.Alignment.BASELINE)
-       						.addComponent(getjLblPDFile(),GroupLayout.PREFERRED_SIZE, 100,GroupLayout.PREFERRED_SIZE)
-                        			.addComponent(getLabelTitulo(),GroupLayout.PREFERRED_SIZE, 100,GroupLayout.PREFERRED_SIZE))
+       						.addComponent(getjLblPDFile(),GroupLayout.PREFERRED_SIZE, 50,GroupLayout.PREFERRED_SIZE)
+                        	.addComponent(getLabelTitulo(),GroupLayout.PREFERRED_SIZE, 50,GroupLayout.PREFERRED_SIZE))
+				.addGap(50,50,50)
 
-
-						.addGroup(myLayout.createParallelGroup(GroupLayout.Alignment.BASELINE).
-								addComponent(getBotonFirmar(),GroupLayout.PREFERRED_SIZE, 90,GroupLayout.PREFERRED_SIZE).
-								//addComponent(getBotonFlechaDerecha(),GroupLayout.PREFERRED_SIZE, 90,GroupLayout.PREFERRED_SIZE).
-								addComponent(getBotonSubirPdf(),GroupLayout.PREFERRED_SIZE, 90,GroupLayout.PREFERRED_SIZE)
-						).
-						addGap(50,50,50).
-						addGroup(myLayout.createParallelGroup(GroupLayout.Alignment.BASELINE).
-								addComponent(getBotonVerPdf(),GroupLayout.PREFERRED_SIZE, 40,GroupLayout.PREFERRED_SIZE).
-								//addComponent(getBotonAyuda(),GroupLayout.PREFERRED_SIZE, 40,GroupLayout.PREFERRED_SIZE)
-								addComponent(getIconoProcesando(),GroupLayout.PREFERRED_SIZE, 80,GroupLayout.PREFERRED_SIZE))
-								
-
+				.addGroup(myLayout.createParallelGroup(GroupLayout.Alignment.BASELINE)
+							.addComponent(getBotonFirmar(),GroupLayout.PREFERRED_SIZE, 90,GroupLayout.PREFERRED_SIZE)
+							.addComponent(getBotonSubirPdf(),GroupLayout.PREFERRED_SIZE, 90,GroupLayout.PREFERRED_SIZE))
+				
+				.addGap(20,20,20)
+				.addGroup(myLayout.createParallelGroup(GroupLayout.Alignment.BASELINE)
+							.addComponent(getBotonVerPdf(),GroupLayout.PREFERRED_SIZE, 40,GroupLayout.PREFERRED_SIZE)
+							.addComponent(getBotonVerPdfFirmado(),GroupLayout.PREFERRED_SIZE, 40,GroupLayout.PREFERRED_SIZE))
+				.addGap(10,10,10)				
+				.addGroup(myLayout.createParallelGroup(GroupLayout.Alignment.BASELINE)
+							.addComponent(getProgressBar(),GroupLayout.PREFERRED_SIZE, 40,GroupLayout.PREFERRED_SIZE))
 
 		);
-		//Se oculta el gif procesando
-		labelIconoProcesando.setVisible(false);	
+		hideProgress();
 
 	}
 
@@ -527,14 +525,17 @@ public class VentanaPrincipal  {
 			botonFirmar.setEnabled(false);
 			botonSubirPdf.setEnabled(false);
 		} else if (operation.equals("firmaDocOk")) {
-			//Se oculta gif procesando
-			labelIconoProcesando.setVisible(false);		
-			
+			hideProgress();
+			botonVerPdf.setEnabled(false);
 			botonFirmar.setEnabled(false);//false
+			botonVerPdfFirmado.setEnabled(true);
 			botonSubirPdf.setEnabled(true);
+		} else if (operation.equals("firmaDocError")) {
+			hideProgress();
 		} else if (operation.equals("subidaDocOk")) {
 			botonFirmar.setEnabled(false);
 			botonVerPdf.setEnabled(false);
+			botonVerPdfFirmado.setEnabled(false);
 			botonSubirPdf.setEnabled(false);
 		}
 	}
@@ -658,35 +659,6 @@ public class VentanaPrincipal  {
 		this.container = container;
 	}
 
-	/**
-	 * 
-	 * @param jLblPDFile
-	 */
-	public void setjLblPDFile(JLabel jLblPDFile) {
-		this.jLblPDFile = jLblPDFile;
-	}
-
-	/**
-	 * 
-	 * @param botonSubirPdf
-	 */
-	public void setBotonSubirPdf(JButton botonSubirPdf) {
-		this.botonSubirPdf = botonSubirPdf;
-	}
-	/**
-	 * 
-	 * @param botonVerPdf
-	 */
-	public void setBotonVerPdf(JButton botonVerPdf) {
-		this.botonVerPdf = botonVerPdf;
-	}
-	/**
-	 * 
-	 * @param botonFirmar
-	 */
-	public void setBotonFirmar(JButton botonFirmar) {
-		this.botonFirmar = botonFirmar;
-	}
 	/**+
 	 * 
 	 * @param signProps
@@ -747,7 +719,14 @@ public class VentanaPrincipal  {
 		return pdfControler;
 	}
 
-
+	public void showProgress(String message) {
+		progressBar.setVisible(true);
+		progressBar.setString(message);
+	}
+	
+	public void hideProgress() {
+		progressBar.setVisible(false);
+	}
 
 
 
