@@ -1,4 +1,8 @@
-1. Instalar los pre-requisitos presentes en el  README
+
+1. Instalar los pre-requisitos presentes en el README, respetar los numeros exactos de versiones (si no, no anda!)
+   Recordar setear correctamente el JAVA_HOME para apuntar a la 1.6. Ejemplo:
+
+	export JAVA_HOME=/System/Library/Java/JavaVirtualMachines/1.6.0.jdk/Contents/Home
 
 2. Por unica vez generar el keystore para autofirmar el mismo applet
 
