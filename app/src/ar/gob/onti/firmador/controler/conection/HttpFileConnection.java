@@ -60,14 +60,14 @@ public class HttpFileConnection  {
 				connectURL = (HttpURLConnection)tmpUrl.openConnection(HttpFileConnection.createProxy(proxy));
 				retValue = true;
 			} catch (MalformedURLException e) {
-                                e.printStackTrace();
+				e.printStackTrace();
 				cargarMensajeError(e,urlString);
 			} 
 			catch (IOException e) {
-                                e.printStackTrace();
+				e.printStackTrace();
 				cargarMensajeError(e,urlString);
 			} catch (URISyntaxException e) {
-                                e.printStackTrace();
+				e.printStackTrace();
 				cargarMensajeError(e,urlString);
 			}
 		return retValue;

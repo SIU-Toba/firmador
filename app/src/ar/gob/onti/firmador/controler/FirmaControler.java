@@ -169,7 +169,9 @@ public class FirmaControler {
 	 * @return
 	 */
     public boolean cargarArbolDeCertificados(Container container){
+
     	if (!mainWindow.getPdfControler().existeCertificate()) {
+
 			StringBuffer tokenPin = new StringBuffer();
 //			 Se pide el ingreso del PIN en caso de token
 /*
@@ -179,12 +181,14 @@ public class FirmaControler {
  */
 			if (!mainWindow.getPdfControler().cargarKeyStore(tokenPin.toString()) ) {
 				mostrarMensajesError(container, mainWindow.getPdfControler().getSignError(), null);
+
 				return false;
 			} else{
 				if(!mostrarCertificados(tokenPin.toString())){
 					return false;
 				}
 			}
+
 		}	
     	return true;
     }
@@ -197,7 +201,7 @@ public class FirmaControler {
     public boolean mostrarListaDePreguntas(Container container){
     	PreguntasRespuestas preguntasRespuestas = this.myProps.getPreguntas();
 
-    	if (preguntasRespuestas.getItems().size() == 0) {
+    	if (preguntasRespuestas == null || preguntasRespuestas.getItems().size() == 0) {
     		return true;
     	}
     	QuestionList questionListDlg = new QuestionList();

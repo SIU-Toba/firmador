@@ -13,10 +13,9 @@
 	<version>1.0</version>
 
 	<build>
-		<!-- 
-		No compila en linux
+
 		<testOutputDirectory>target/test-classes</testOutputDirectory>
-        	<testSourceDirectory>test/src</testSourceDirectory> -->
+        	<testSourceDirectory>test/src</testSourceDirectory> 
 		<sourceDirectory>app/src</sourceDirectory>
 		<resources>
 			<resource>

@@ -118,7 +118,6 @@ public class FirmaControlerTest {
 		principal.inicializar();
 		if(pdfControler){
 		principal.setpdfControler(getPdfControler());
-		principal.initLogFile(jFrame );
 		principal.initProps(jFrame );
 		principal.initLogFile(jFrame );
 		}
@@ -187,6 +186,9 @@ public class FirmaControlerTest {
 	*/
 	@Test
 	public final void testCargarArbolDeCertificados() {
+  		if (System.getProperty("os.name").toLowerCase().indexOf("win") == -1) {
+			return;
+		}
 		FirmaControler firmaControler=	inicializar(false);
 		PropsConfig.getInstance().setVisible(false);
 		assertFalse(firmaControler.cargarArbolDeCertificados(new JFrame()));
@@ -206,7 +208,7 @@ public class FirmaControlerTest {
 	public final void testAgregarParametroUrl() {
 		FirmaControler firmaControler=	getControler();
 		HttpFileDownLoader fileDownLoader=new HttpFileDownLoader();
-		assertEquals(firmaControler.agregarParametroUrl(new JFrame(), "http://localhost:8080/appletServlet",fileDownLoader),"http://localhost:8080/appletServlet?idDominio=RQVMJGPTU589IWSDdfdknv&tipoDeArchivo=SDLFKJSDF675878sjdlsdj");
+		assertEquals(firmaControler.agregarParametroUrl(new JFrame(), "http://localhost:8080/appletServlet",fileDownLoader),"http://localhost:8080/appletServlet?codigo=RQVMJGPTU589IWSDdfdknv");
 	}
 
 	@Test

@@ -229,6 +229,9 @@ public class PdfControlerTest {
 
 	@Test
 	public final void testCargarKeyStoreWindows() {
+		if (System.getProperty("os.name").toLowerCase().indexOf("win") == -1) {
+			return;
+		}
 		try {
 			pdfControler= new PdfControler();
 		} catch (NoSuchAlgorithmException e1) {
@@ -252,9 +255,12 @@ public class PdfControlerTest {
 
 	@Test
     public final void testCargarKeyStoreIExplorer() {
-		    PropsConfig.getInstance().setBrowser(FirmaApplet.IEXPLORER);
-            pdfControler.getCurrentKeyStoreData().setKeyStore(null);
-            assertTrue(pdfControler.cargarKeyStore(""));
+		if (System.getProperty("os.name").toLowerCase().indexOf("win") == -1) {
+			return;
+		}		
+		PropsConfig.getInstance().setBrowser(FirmaApplet.IEXPLORER);
+		pdfControler.getCurrentKeyStoreData().setKeyStore(null);
+		assertTrue(pdfControler.cargarKeyStore(""));
     }
 
 	/*

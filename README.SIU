@@ -25,8 +25,8 @@
 	export FIRMADOR_STOREPASS=password
 	export FIRMADOR_KEYPASS=password
 
-5. Compilar en modo 'producción' (sin eso no va a permitir realizar la firma en sí)
+5. Compilar en modo 'producción' (sin eso no va a permitir realizar la firma en sí). Tambien se evita correr los tests
 
-	mvn clean compile install -DFIRMADOR_PROD
+	mvn -q compile install -DFIRMADOR_PROD -DskipTests=true
 
 

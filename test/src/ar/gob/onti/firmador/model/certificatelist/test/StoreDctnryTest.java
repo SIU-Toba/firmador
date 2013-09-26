@@ -63,6 +63,10 @@ public class StoreDctnryTest {
 
 	@Test
 	public final void testLoadKeyStore() {
+		if (System.getProperty("os.name").toLowerCase().indexOf("win") == -1) {
+			return;
+		}
+
 		StoreDctnry dctnry= new StoreDctnry();
 		PdfControler controler = null;
 		try {

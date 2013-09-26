@@ -39,6 +39,21 @@ public class HttpFileDownLoader extends HttpFileConnection{
 	public void setLocalFileName(String localFileName) {
 		this.localFileName = localFileName;
 	}
+	
+	/**
+	 * metodo que se encarga de conectarse con la url que el
+	 * Applet recibe como parametro y con el nombre de archivo y direcctorio que recibe 
+	 * como parametro escribir en disco en la carpeta de archivos temporales del sistema
+	 * operativo el archivo pdf a ser firmado por la aplicacion
+	 * @param srcDirectory
+	 * @param nombreArchivo
+	 * @return
+	 * @throws IOException 
+	 */
+	public boolean doDownload(String srcDirectory,String nombreArchivo) throws IOException {
+		return doDownload(srcDirectory, nombreArchivo, null);
+	}	
+	
 	/**
 	 * metodo que se encarga de conectarse con la url que el
 	 * Applet recibe como parametro y con el nombre de archivo y direcctorio que recibe 

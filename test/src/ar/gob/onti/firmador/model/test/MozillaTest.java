@@ -13,8 +13,11 @@ public class MozillaTest {
 	
 	@Test
 	public final void testGetMozillaNSSLibraryName() {
-		  Mozilla mozilla= new Mozilla(); 
-		  assertTrue(mozilla.getMozillaNSSLibraryName().contains("softokn3.dll"));
+  		if (System.getProperty("os.name").toLowerCase().indexOf("win") == -1) {
+			return;
+		}
+		Mozilla mozilla= new Mozilla(); 
+		assertTrue(mozilla.getMozillaNSSLibraryName().contains("softokn3.dll"));
 	}
 
 	@Test

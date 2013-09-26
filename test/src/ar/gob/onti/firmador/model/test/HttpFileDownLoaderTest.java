@@ -8,6 +8,7 @@ import org.junit.Test;
 
 import ar.gob.onti.firmador.controler.conection.HttpFileDownLoader;
 import ar.gob.onti.firmador.model.PropsConfig;
+import com.sun.net.httpserver.Authenticator;
 
 public class HttpFileDownLoaderTest {
 
