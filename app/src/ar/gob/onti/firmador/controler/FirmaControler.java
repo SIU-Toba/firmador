@@ -276,7 +276,7 @@ public class FirmaControler {
 			aCertsDlg.inicializar(findParentFrame(), mainWindow.getPdfControler().getKeyStores(), mainWindow.getSignProps().getAutoCertificantes());
 			if (aCertsDlg.getSelectedCert().length() > 0){
 				mainWindow.getCertSelecionado().setText(aCertsDlg.getSelectedCert());
-				if(!mainWindow.getPdfControler().cargarClavePrivadaYCadenaDeCertificados( mainWindow.getCertSelecionado().getText().trim(), tokenPin, false)){
+				if(!mainWindow.getPdfControler().cargarClavePrivadaYCadenaDeCertificados( mainWindow.getCertSelecionado().getText().trim(), tokenPin, true)){
 					mostrarMensajesError(mainWindow.getContainer(),mainWindow.getPdfControler().getSignError() , null);
 					return false;
 				}
