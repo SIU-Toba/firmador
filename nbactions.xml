@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<actions>
+        <action>
+            <actionName>build</actionName>
+            <goals>
+                <goal>-q</goal>
+                <goal>install</goal>
+            </goals>
+            <properties>
+                <skipTests>true</skipTests>
+                <FIRMADOR_PROD>1</FIRMADOR_PROD>
+                <Env.FIRMADOR_STORE>keystore.jks</Env.FIRMADOR_STORE>
+                <Env.FIRMADOR_ALIAS>key</Env.FIRMADOR_ALIAS>
+                <Env.FIRMADOR_STOREPASS>password</Env.FIRMADOR_STOREPASS>
+                <Env.FIRMADOR_KEYPASS>password</Env.FIRMADOR_KEYPASS>
+            </properties>
+        </action>
+    </actions>

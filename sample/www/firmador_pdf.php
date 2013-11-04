@@ -45,7 +45,7 @@ class firmador_pdf
    }
    
       
-   function generar_applet($url_jar, $url_descarga, $url_subir, $motivo, $width = '700', $height = '310')
+   function generar_applet($url_jar, $url_descarga, $url_subir, $motivo, $width = '400', $height = '150')
    {
         $sesion = $this->generar_sesion();
 		$param_cookie = "";
@@ -54,6 +54,17 @@ class firmador_pdf
 			$param_cookie = "<param  name='COOKIE' value='$cookie' />";
 		}
 ?>
+<html>
+      <head>
+    <title>Ejemplo de Firmador PDF</title>
+    <script type="text/javascript" src="pdfobject.min.js"></script>
+    <script type="text/javascript">
+      window.onload = function (){
+        var success = new PDFObject({ url: "<?php echo $url_descarga; ?>&codigo=<?php echo $sesion; ?>" }).embed("pdf");
+      };
+    </script>
+  </head> 
+    <body>    
         <applet  code="ar/gob/onti/firmador/view/FirmaApplet" 	 
            archive="<?php echo $url_jar; ?>"  width="<?php echo $width; ?>"	height="<?php echo $height; ?>" >
          <param  name="URL_DESCARGA"	 value="<?php echo $url_descarga; ?>" >
@@ -64,6 +75,10 @@ class firmador_pdf
 		 <param name='codebase_lookup' value='false' >
 		 <?php echo $param_cookie; ?>
         </applet>
+        <!--   -->
+        <div id="pdf" style="text-align: center">Parece que no tiene Adobe Reader o soporte PDF en este navegador.</br>Para configurar correctamente instale Adobe Reader y siga <a href="http://helpx.adobe.com/acrobat/using/display-pdf-browser-acrobat-xi.html">estas instrucciones</a>.
+        </div>
+    </body>
 <?php
    }
    

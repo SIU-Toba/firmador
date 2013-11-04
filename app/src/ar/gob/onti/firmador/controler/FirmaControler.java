@@ -107,15 +107,22 @@ public class FirmaControler {
 		}
 		try {
 			if (firmarDocumentoPdf(container)) {
-					FileSystem.getInstance().borrarArchivo(mainWindow.getArchivoParaFirmar().getPath()); 
-					mainWindow.setArchivoParaFirmar(null);
-					mainWindow.setCtrls("firmaDocOk");
+				FileSystem.getInstance().borrarArchivo(mainWindow.getArchivoParaFirmar().getPath()); 
+				mainWindow.setArchivoParaFirmar(null);
+				mainWindow.setCtrls("firmaDocOk");
 			} else {
-					mainWindow.setCtrls("firmaDocError");
+				mainWindow.setCtrls("firmaDocError");
 			}
+                } catch (java.security.ProviderException e) {
+        		mainWindow.setCtrls("firmaDocError");
+       			e.printStackTrace();
+			mostrarMensajesError(container, myProps.getString("errorFirmaProvider"), e);
+                   					mainWindow.setCtrls("firmaDocError");
+
 		} catch (Exception e) {
+        		mainWindow.setCtrls("firmaDocError");
 			e.printStackTrace();
-			mostrarMensajesError(container,myProps.getString("errorEliminandoSinFirmar"), e);
+			mostrarMensajesError(container, myProps.getString("errorEliminandoSinFirmar"), e);
 		}
 	}
 	/**
@@ -372,7 +379,7 @@ public class FirmaControler {
 							//mostrarMensajesOk(container, myProps.getString("msjDescargaOK"), myProps.getString("descargaDictamen"));
 
 							//Nuevo requerimiento: Una vez finalizado la descarga del documento, debe ser visualizado en pantalla
-							visualizarDocumento(container, mainWindow.getArchivoParaFirmar());
+							//visualizarDocumento(container, mainWindow.getArchivoParaFirmar());
 						}
 					}
 				} catch (IOException e) {
@@ -402,7 +409,6 @@ public class FirmaControler {
 		            try {
 						source.close();
 					} catch (IOException e) {
-						// TODO Auto-generated catch block
 						e.printStackTrace();
 					}
 		        }
@@ -410,7 +416,6 @@ public class FirmaControler {
 		            try {
 						destination.close();
 					} catch (IOException e) {
-						// TODO Auto-generated catch block
 						e.printStackTrace();
 					}
 		        }
