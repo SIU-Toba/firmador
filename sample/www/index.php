@@ -19,14 +19,12 @@ $firmador->set_guardar_sesion_en_php();
 //-- Enviar applet
 if (! isset($_GET['accion'])) {
 	$url_actual = $firmador->get_url_base_actual(). $_SERVER['REQUEST_URI'];
-        
 	$firmador->generar_applet("firmador.jar", 
 								$url_actual."?accion=descargar",
 								$url_actual."?accion=subir",
-								"Motivo de firma",
-								400,
-								150
+								"Motivo de firma"
 			);
+	$firmador->generar_visor_pdf("pdfobject.min.js", $url_actual."?accion=descargar");
 	die;
 }
 

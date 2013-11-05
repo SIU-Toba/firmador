@@ -387,15 +387,15 @@ public class VentanaPrincipal  {
 						.addGap(10,10,10)
                 		.addComponent(getLabelTitulo(),GroupLayout.PREFERRED_SIZE, 70,GroupLayout.PREFERRED_SIZE)
 						.addGap(10,10,10)
-						.addComponent(getjLblPDFile(),GroupLayout.PREFERRED_SIZE, 100,GroupLayout.PREFERRED_SIZE))
+						.addComponent(getjLblPDFile(),GroupLayout.PREFERRED_SIZE, 120,GroupLayout.PREFERRED_SIZE)
+						.addGap(10,10,10)
+						.addComponent(getProgressBar(),GroupLayout.PREFERRED_SIZE, 180,GroupLayout.PREFERRED_SIZE))
 				.addGroup(myLayout.createSequentialGroup()
 						.addGap(marginLeft,marginLeft,marginLeft)
-						.addComponent(getBotonFirmar(),GroupLayout.PREFERRED_SIZE, 150,GroupLayout.PREFERRED_SIZE)
+						.addComponent(getBotonFirmar(),GroupLayout.PREFERRED_SIZE, 180,GroupLayout.PREFERRED_SIZE)
 						.addGap(20,20,20)
-						.addComponent(getBotonVerPdf(),GroupLayout.PREFERRED_SIZE, 150,GroupLayout.PREFERRED_SIZE))				
-				.addGroup(myLayout.createSequentialGroup()
-						.addGap(80,80,80)
-						.addComponent(getProgressBar(),GroupLayout.PREFERRED_SIZE, 200,GroupLayout.PREFERRED_SIZE))
+						.addComponent(getBotonVerPdf(),GroupLayout.PREFERRED_SIZE, 180,GroupLayout.PREFERRED_SIZE))				
+
 		);
 
 
@@ -403,15 +403,14 @@ public class VentanaPrincipal  {
 
 				.addGroup(myLayout.createParallelGroup(GroupLayout.Alignment.BASELINE)
        						.addComponent(getjLblPDFile(),GroupLayout.PREFERRED_SIZE, 50,GroupLayout.PREFERRED_SIZE)
-                        	.addComponent(getLabelTitulo(),GroupLayout.PREFERRED_SIZE, 50,GroupLayout.PREFERRED_SIZE))
+                        	.addComponent(getLabelTitulo(),GroupLayout.PREFERRED_SIZE, 50,GroupLayout.PREFERRED_SIZE)
+							.addComponent(getProgressBar(),GroupLayout.PREFERRED_SIZE, 30,GroupLayout.PREFERRED_SIZE))
 				.addGap(10,10,10)
 
 				.addGroup(myLayout.createParallelGroup(GroupLayout.Alignment.BASELINE)
 							.addComponent(getBotonFirmar(),GroupLayout.PREFERRED_SIZE, 40,GroupLayout.PREFERRED_SIZE)
 							.addComponent(getBotonVerPdf(),GroupLayout.PREFERRED_SIZE, 40,GroupLayout.PREFERRED_SIZE))
 				.addGap(10,10,10)				
-				.addGroup(myLayout.createParallelGroup(GroupLayout.Alignment.BASELINE)
-							.addComponent(getProgressBar(),GroupLayout.PREFERRED_SIZE, 30,GroupLayout.PREFERRED_SIZE))
 
 		);
 		hideProgress();

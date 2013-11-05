@@ -44,8 +44,28 @@ class firmador_pdf
         return $protocol . "://" . $_SERVER['SERVER_NAME'] . $port;
    }
    
+   
+   function generar_visor_pdf($url_js, $url_descarga, $width="", $height="")
+   {
+        $sesion = $this->generar_sesion();
+?>	   
+	<div id="pdf" style="height:<?php echo $height;?>; width:<?php echo $width;?>; text-align: center">Parece que no tiene Adobe Reader o soporte PDF en este navegador.</br>Para configurar correctamente instale Adobe Reader y siga <a href="http://helpx.adobe.com/acrobat/using/display-pdf-browser-acrobat-xi.html">estas instrucciones</a>.
+	</div>
+    <script type="text/javascript" src="<?php echo $url_js; ?>"></script>
+    <script type="text/javascript">
+      window.onload = function (){
+			var success = new PDFObject(
+			{ 
+				url: "<?php echo $url_descarga; ?>&codigo=<?php echo $sesion; ?>", 	
+				pdfOpenParams: { toolbar: "0", statusbar: "0" }
+			}).embed("pdf");
+		}
+    </script>
+<?php	   
+   }
+   
       
-   function generar_applet($url_jar, $url_descarga, $url_subir, $motivo, $width = '400', $height = '150')
+   function generar_applet($url_jar, $url_descarga, $url_subir, $motivo, $width = '400', $height = '120')
    {
         $sesion = $this->generar_sesion();
 		$param_cookie = "";
@@ -54,17 +74,6 @@ class firmador_pdf
 			$param_cookie = "<param  name='COOKIE' value='$cookie' />";
 		}
 ?>
-<html>
-      <head>
-    <title>Ejemplo de Firmador PDF</title>
-    <script type="text/javascript" src="pdfobject.min.js"></script>
-    <script type="text/javascript">
-      window.onload = function (){
-        var success = new PDFObject({ url: "<?php echo $url_descarga; ?>&codigo=<?php echo $sesion; ?>" }).embed("pdf");
-      };
-    </script>
-  </head> 
-    <body>    
         <applet  code="ar/gob/onti/firmador/view/FirmaApplet" 	 
            archive="<?php echo $url_jar; ?>"  width="<?php echo $width; ?>"	height="<?php echo $height; ?>" >
          <param  name="URL_DESCARGA"	 value="<?php echo $url_descarga; ?>" >
@@ -75,10 +84,7 @@ class firmador_pdf
 		 <param name='codebase_lookup' value='false' >
 		 <?php echo $param_cookie; ?>
         </applet>
-        <!--   -->
-        <div id="pdf" style="text-align: center">Parece que no tiene Adobe Reader o soporte PDF en este navegador.</br>Para configurar correctamente instale Adobe Reader y siga <a href="http://helpx.adobe.com/acrobat/using/display-pdf-browser-acrobat-xi.html">estas instrucciones</a>.
-        </div>
-    </body>
+
 <?php
    }
    
