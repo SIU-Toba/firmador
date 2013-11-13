@@ -13,24 +13,27 @@
 	<version>1.0</version>
 
 	<build>
-
-		<testOutputDirectory>target/test-classes</testOutputDirectory>
-        	<testSourceDirectory>test/src</testSourceDirectory> 
 		<sourceDirectory>app/src</sourceDirectory>
 		<resources>
 			<resource>
 				<directory>app/resource</directory>
 			</resource>
 		</resources>
+		<!-- <testOutputDirectory>target/test-classes</testOutputDirectory>
+        	<testSourceDirectory>test/src</testSourceDirectory> 
+
 		<testResources>
 			<testResource>
 				<directory>test/resource</directory>
 			</testResource>
 		</testResources>
+-->
 		<plugins>
 		<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
+				  <version>2.3.2</version>
+
 				<configuration>
 					<source>1.6</source>
 					<target>1.6</target>
@@ -46,7 +49,12 @@
 					<addMavenDescriptor>false</addMavenDescriptor>
 					<manifestEntries>
 						<Permissions>all-permissions</Permissions>
-						<Trusted-Library>true</Trusted-Library>
+						<Caller-Allowable-Codebase>*</Caller-Allowable-Codebase>
+						<Sealed>true</Sealed>
+						<Codebase>*</Codebase>
+						<Application-Library-Allowable-Codebase>*</Application-Library-Allowable-Codebase>
+						<Application-Name>Firmador Digital PDF</Application-Name>
+						<Implementation-Vendor>SIU</Implementation-Vendor>
 					</manifestEntries>
 				</archive>
 					<descriptorRefs>

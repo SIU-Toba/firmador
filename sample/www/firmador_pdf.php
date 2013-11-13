@@ -3,9 +3,24 @@
 class firmador_pdf
 {
 	protected $sesion_handler = 'php';
-    protected $db = null;
+    protected $motivo = "Firmar PDF";
+	protected $dimension_ancho = 400;
+	protected $dimension_alto = 120;
+	
+	protected $db = null;
     protected $sesion;
 	
+	
+	function __construct()
+	{
+		$this->set_guardar_sesion_en_php();
+	}
+	
+	   
+   //-----------------------------------------
+   //--- SETUP
+   //-----------------------------------------
+   
    function set_guardar_sesion_en_db($conexion)
    {
        $this->db = $conexion;
@@ -25,15 +40,17 @@ class firmador_pdf
 	   }
    }
    
-   
-   function enviar_headers_pdf()
+   function set_motivo($motivo)
    {
-        header("Cache-Control: private");
-        header("Content-type: application/pdf");
-        header("Pragma: no-cache");
-        header("Expires: 0");
-    }
-    
+	   $this->motivo = $motivo;
+   }
+   
+   function set_dimension($ancho, $alto)
+   {
+	   $this->dimension_ancho = $ancho;
+	   $this->dimension_alto = $alto;
+   }
+   
    
    function get_url_base_actual() 
    {
@@ -45,48 +62,67 @@ class firmador_pdf
    }
    
    
+   //-----------------------------------------
+   //--- GENERACION
+   //-----------------------------------------
+
+   
    function generar_visor_pdf($url_js, $url_descarga, $width="", $height="")
    {
         $sesion = $this->generar_sesion();
-?>	   
-	<div id="pdf" style="height:<?php echo $height;?>; width:<?php echo $width;?>; text-align: center">Parece que no tiene Adobe Reader o soporte PDF en este navegador.</br>Para configurar correctamente instale Adobe Reader y siga <a href="http://helpx.adobe.com/acrobat/using/display-pdf-browser-acrobat-xi.html">estas instrucciones</a>.
-	</div>
-    <script type="text/javascript" src="<?php echo $url_js; ?>"></script>
-    <script type="text/javascript">
-      window.onload = function (){
-			var success = new PDFObject(
-			{ 
-				url: "<?php echo $url_descarga; ?>&codigo=<?php echo $sesion; ?>", 	
-				pdfOpenParams: { toolbar: "0", statusbar: "0" }
-			}).embed("pdf");
-		}
-    </script>
-<?php	   
+		?>	   
+			<div id="pdf" style="height:<?php echo $height;?>; width:<?php echo $width;?>; text-align: center">Parece que no tiene Adobe Reader o soporte PDF en este navegador.</br>Para configurar correctamente instale Adobe Reader y siga <a href="http://helpx.adobe.com/acrobat/using/display-pdf-browser-acrobat-xi.html">estas instrucciones</a>.
+			</div>
+			<script type="text/javascript" src="<?php echo $url_js; ?>"></script>
+			<script type="text/javascript">
+			  window.onload = function (){
+					var success = new PDFObject(
+					{ 
+						url: "<?php echo $url_descarga; ?>&codigo=<?php echo $sesion; ?>", 	
+						pdfOpenParams: { toolbar: "0", statusbar: "0" }
+					}).embed("pdf");
+				}
+			</script>
+		<?php	   
+   }
+   
+    
+   function generar_applet($url_jar, $url_descarga, $url_subir)
+   {
+        $sesion = $this->generar_sesion();
+		?>
+        <applet  id="AppletFirmador" code="ar/gob/onti/firmador/view/FirmaApplet" 	 scriptable="true" 
+           archive="<?php echo $url_jar; ?>"  width="<?php echo $this->dimension_ancho; ?>"	height="<?php echo $this->dimension_alto; ?>" >
+		<?php if (isset($url_descarga)) { ?>			
+			 <param  name="URL_DESCARGA"	 value="<?php echo $url_descarga; ?>" />
+		<?php } else { ?>
+			 <param  name="MULTIPLE"	 value="true" />
+		<?php } ?>
+         <param name="URL_SUBIR"	value="<?php echo $url_subir; ?>" />
+         <param name="MOTIVO"  value="<?php echo $this->motivo; ?>" />
+         <param name="CODIGO"  value="<?php echo $sesion; ?>" />
+         <param name="PREGUNTAS" value='{ "preguntasRespuestas": []}' />
+		 <param name='codebase_lookup' value='false' />
+		<?php if ($this->sesion_handler == 'php') { ?>	
+			<param  name="COOKIE" value="<?php echo session_name()."=".session_id(); ?>" />
+		<?php } ?>
+        </applet>
+		<?php
+   }
+   
+   function generar_applet_firma_multiple($url_jar, $url_subir)
+   {
+	   $this->generar_applet($url_jar, null, $url_subir);
    }
    
       
-   function generar_applet($url_jar, $url_descarga, $url_subir, $motivo, $width = '400', $height = '120')
+   function enviar_headers_pdf()
    {
-        $sesion = $this->generar_sesion();
-		$param_cookie = "";
-		if ($this->sesion_handler == 'php') {
-			$cookie = session_name()."=".session_id();
-			$param_cookie = "<param  name='COOKIE' value='$cookie' />";
-		}
-?>
-        <applet  code="ar/gob/onti/firmador/view/FirmaApplet" 	 
-           archive="<?php echo $url_jar; ?>"  width="<?php echo $width; ?>"	height="<?php echo $height; ?>" >
-         <param  name="URL_DESCARGA"	 value="<?php echo $url_descarga; ?>" >
-         <param  name="URL_SUBIR"	value="<?php echo $url_subir; ?>">
-         <param  name="MOTIVO"  value="<?php echo $motivo; ?>">
-         <param  name="CODIGO"  value="<?php echo $sesion; ?>" />
-         <param name="PREGUNTAS" value='{ "preguntasRespuestas": []}' />
-		 <param name='codebase_lookup' value='false' >
-		 <?php echo $param_cookie; ?>
-        </applet>
-
-<?php
-   }
+        header("Cache-Control: private");
+        header("Content-type: application/pdf");
+        header("Pragma: no-cache");
+        header("Expires: 0");
+    }
    
    //-----------------------------------------
    //--- MANEJO DE SESION

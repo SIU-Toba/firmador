@@ -19,6 +19,8 @@ import java.net.URI;
 public class HttpFileConnection  {
 	private String httpFileError="";
 	private  HttpURLConnection connectURL=null;
+	private Proxy proxy = null;
+	
 	public String getHttpFileError() {
 		return httpFileError;
 	}
@@ -55,9 +57,9 @@ public class HttpFileConnection  {
 		boolean retValue = false;
       
 			try {
-				  Proxy proxy=this.detectProxy(urlString);
+				Proxy proxy=this.detectProxy(urlString);
 				final URL tmpUrl = new URL(urlString);
-				connectURL = (HttpURLConnection)tmpUrl.openConnection(HttpFileConnection.createProxy(proxy));
+				connectURL = (HttpURLConnection)tmpUrl.openConnection(proxy == null ? java.net.Proxy.NO_PROXY : HttpFileConnection.createProxy(proxy));
 				retValue = true;
 			} catch (MalformedURLException e) {
 				e.printStackTrace();
@@ -86,30 +88,33 @@ public class HttpFileConnection  {
 	 * @throws URISyntaxException
 	 */
 	public Proxy detectProxy(String url) throws URISyntaxException   {
+		if (proxy == null) {
 			java.net.InetSocketAddress addr=null;
 			try{
 				com.sun.java.browser.net.ProxyInfo[] pi = ProxyService.getProxyInfo(new URL(url));
-				return new Proxy(pi[0].getHost(), pi[0].getPort(), java.net.Proxy.Type.HTTP);
+				proxy = new Proxy(pi[0].getHost(), pi[0].getPort(), java.net.Proxy.Type.HTTP);
 			}catch(IOException e){
-				if (e.getMessage().equalsIgnoreCase("Proxy service provider is not yet set")){
-					System.setProperty("java.net.useSystemProxies","true"); // I don't know if this part is always necessary
-					java.util.List<java.net.Proxy> listProxy = ProxySelector.getDefault().select(new java.net.URI(url));
+				try {
+					if (e.getMessage().equalsIgnoreCase("Proxy service provider is not yet set")){
+						System.setProperty("java.net.useSystemProxies","true"); // I don't know if this part is always necessary
+						java.util.List<java.net.Proxy> listProxy = ProxySelector.getDefault().select(new java.net.URI(url));
 
-					for (Iterator<java.net.Proxy> iter = listProxy.iterator(); iter.hasNext(); ) {
-						java.net.Proxy proxy = (java.net.Proxy) iter.next();
-						addr = (java.net.InetSocketAddress)proxy.address();
-						if(addr == null) {
-
-							return null;
-						} else {
-
-							return new Proxy(addr.getHostName(),addr.getPort(),proxy.type());
+						for (Iterator<java.net.Proxy> iter = listProxy.iterator(); iter.hasNext(); ) {
+							java.net.Proxy newProxy = (java.net.Proxy) iter.next();
+							addr = (java.net.InetSocketAddress) newProxy.address();
+							if(addr != null) {
+								proxy = new Proxy(addr.getHostName(),addr.getPort(),newProxy.type());
+								break;
+							}
 						}
 					}
+				} catch (java.security.AccessControlException sec) {
+					sec.printStackTrace();
 				}
 			}
-			return null;
 		}
+		return proxy;
+	}
 
 
 		

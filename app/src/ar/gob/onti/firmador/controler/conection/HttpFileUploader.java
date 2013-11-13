@@ -178,7 +178,7 @@ public class HttpFileUploader extends HttpFileConnection {
 	 * @return
 	 * @throws IOException 
 	 */
-	public boolean doUpload(String fileName, PropsConfig myProps,String codigo,String objetoDominio,String tipoArchivo, String cookie) throws IOException {
+	public boolean doUpload(String fileName, PropsConfig myProps,String codigo, String cookie) throws IOException {
 		String errorBuffer="";
 
 		try {			
@@ -220,7 +220,7 @@ public class HttpFileUploader extends HttpFileConnection {
 		}
 		catch (SocketException e) {
             e.printStackTrace();
-			return doUploadApache(fileName, myProps, codigo, objetoDominio, tipoArchivo);
+			return doUploadApache(fileName, myProps, codigo);
 		}
 		catch (Exception e) {
             e.printStackTrace();            
@@ -320,7 +320,7 @@ public class HttpFileUploader extends HttpFileConnection {
 	 * @return
 	 * @throws IOException 
 	 */
-	public boolean doUploadApache(String fileName, PropsConfig myProps,String codigo,String objetoDominio,String tipoArchivo) throws IOException {
+	public boolean doUploadApache(String fileName, PropsConfig myProps,String codigo) throws IOException {
 		String errorBuffer="";
 		try {			
 			//SocketAddress addr = new InetSocketAddress("210.101.131.231", 8080);
@@ -332,10 +332,7 @@ public class HttpFileUploader extends HttpFileConnection {
 			conn.setDoOutput(true);
 		      
 			Part[] parts = {
-					//new StringPart("idDominio", objetoDominio),
-					//new StringPart("tipoDeArchivo", tipoArchivo),
 					new StringPart("codigo", codigo),
-					//new StringPart("userName", myProps.getUserName()),
 					new FilePart("md5_fileSigned", new File(fileName))};
 			
 			String boundary = Part.getBoundary();

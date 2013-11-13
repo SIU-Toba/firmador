@@ -21,12 +21,16 @@ import javax.swing.JOptionPane;
 import ar.gob.onti.firmador.controler.PdfControler.OriginType;
 import ar.gob.onti.firmador.controler.conection.HttpFileDownLoader;
 import ar.gob.onti.firmador.controler.conection.HttpFileUploader;
+import ar.gob.onti.firmador.model.Documento;
 import ar.gob.onti.firmador.model.PreguntasRespuestas;
 import ar.gob.onti.firmador.model.PropsConfig;
 import ar.gob.onti.firmador.view.DialogSecure;
+import ar.gob.onti.firmador.view.VentanaPrincipal.Estados;
 import ar.gob.onti.firmador.view.VentanaPrincipal;
 import ar.gob.onti.firmador.view.certificatelist.CertsTreeTable;
 import ar.gob.onti.firmador.view.questionlist.QuestionList;
+import java.util.HashMap;
+import java.util.Map;
 
 
 
@@ -43,6 +47,7 @@ public class FirmaControler {
 	private Icon errorIcon = null;
 	private PropsConfig myProps=null;
 	private String error="";
+
 	
 	public String getError() {
 		return error;
@@ -80,6 +85,7 @@ public class FirmaControler {
 	 */
 	public FirmaControler(VentanaPrincipal mainWindow) {
 		super();
+
 		this.mainWindow = mainWindow;
 		this.error="";
 		ClassLoader cl = this.getClass().getClassLoader();
@@ -89,6 +95,26 @@ public class FirmaControler {
 	}
 	
 	
+	public void firmarDocumentos(Container container, HashMap<String, Documento> documentos) {
+		boolean ok = true;
+		for (Map.Entry<String, Documento> entry : documentos.entrySet()) {
+			if (! firmarDocumento(container, entry.getValue())) {
+				ok = false;
+				break;
+			}
+		}
+	
+		if (ok) {
+			//Borra archivos sin firmar			
+			for (Map.Entry<String, Documento> doc : documentos.entrySet()) {
+				FileSystem.getInstance().borrarArchivo(doc.getValue().getArchivoAFirmar().getPath()); 				
+			}
+			mainWindow.setEstado(VentanaPrincipal.Estados.FIRMA_DOC_OK);
+		} else {
+			mainWindow.setEstado(VentanaPrincipal.Estados.FIRMA_DOC_ERROR);
+		}
+	}
+
 	
 	/**
 	 * 
@@ -100,31 +126,31 @@ public class FirmaControler {
 	 * archivo por default que es el actualmente seleccionado
 	 * @param container recibe como parametro el contenedor de los componentes el Applet
 	 */
-	public void firmarDocumento(Container container) {
-		if (!FileSystem.getInstance().isExisteArchivo(mainWindow.getArchivoParaFirmar())) {
+	public boolean firmarDocumento(Container container, Documento documento) {
+		if (!FileSystem.getInstance().isExisteArchivo(documento.getArchivoAFirmar())) {
 			mostrarMensajesError(container, myProps.getString("errorArchivoParaFirmarInexistente"), null);
-			return ;
+			return false;
 		}
 		try {
-			if (firmarDocumentoPdf(container)) {
-				FileSystem.getInstance().borrarArchivo(mainWindow.getArchivoParaFirmar().getPath()); 
-				mainWindow.setArchivoParaFirmar(null);
-				mainWindow.setCtrls("firmaDocOk");
+			if (firmarDocumentoPdf(container, documento)) {
+				return true;
 			} else {
-				mainWindow.setCtrls("firmaDocError");
+				return false;
 			}
-                } catch (java.security.ProviderException e) {
-        		mainWindow.setCtrls("firmaDocError");
+		} catch (java.security.ProviderException e) {
        			e.printStackTrace();
-			mostrarMensajesError(container, myProps.getString("errorFirmaProvider"), e);
-                   					mainWindow.setCtrls("firmaDocError");
+				mostrarMensajesError(container, myProps.getString("errorFirmaProvider"), e);
+				return false;
 
 		} catch (Exception e) {
-        		mainWindow.setCtrls("firmaDocError");
 			e.printStackTrace();
 			mostrarMensajesError(container, myProps.getString("errorEliminandoSinFirmar"), e);
+			return false;
 		}
 	}
+	
+
+	
 	/**
 	 * Metodo encargado de envar mediando un post el archivo pdf firmado
 	 * junto con los parametros de segurdad del applet
@@ -134,18 +160,16 @@ public class FirmaControler {
 	 * @param evt
 	 * @param container recibe como parametro el contenedor de los componentes el Applet
 	 */
-	public boolean subirDocumento(Container container) {
-		if (!mainWindow.getArchivoFirmado().isFile()) {
+	public boolean subirDocumento(Container container, Documento documento) {
+		if (! documento.getArchivoFirmado().isFile()) {
 			mostrarMensajesError(container, myProps.getString("errorArchivoFirmadoInexistente"), null);
 			return false;
 		}
-		if (uploadDoc(container)) {
+		if (uploadDoc(container, documento)) {
 			try {
-				if (FileSystem.getInstance().borrarArchivo(mainWindow.getArchivoFirmado().getPath()) ) {
-					mainWindow.setArchivoParaFirmar(null);
-					mainWindow.setArchivoFirmado(null);
-					mainWindow.setCtrls("subidaDocOk");
-				}	
+				if (FileSystem.getInstance().borrarArchivo(documento.getArchivoFirmado().getPath()) ) {
+					return true;
+				}
 			} catch (IllegalArgumentException e) {
 				e.printStackTrace();
 				mostrarMensajesError(container,myProps.getString("errorEliminandoFirmado"), e);
@@ -154,8 +178,8 @@ public class FirmaControler {
 		}else{
 			return false;
 		}
-
 	}
+	
 	public StringBuffer preguntarPinToken(Container container){
 		StringBuffer tokenPin = new StringBuffer();
 		char[] c = DialogSecure.getInputSecure( findParentFrame(), myProps.getString("ingreseToken"), true,myProps.getString("tokenPin"), 15);
@@ -237,8 +261,7 @@ public class FirmaControler {
 	 * @return
 	 * @throws IOException 
 	 */
-	public boolean firmarDocumentoPdf(Container container) throws IOException {
-    	mainWindow.setArchivoFirmado(null);
+	public boolean firmarDocumentoPdf(Container container, Documento documento) throws IOException {
     	mainWindow.getPdfControler().cleanCurrentKeyStoreData();
     	
 		if(!mostrarListaDePreguntas(container)){
@@ -248,17 +271,18 @@ public class FirmaControler {
 		if(!cargarArbolDeCertificados(container)){
 			return false;
 		}
-		mainWindow.getPdfControler().setNombreArchivoParaFirmar(mainWindow.getArchivoParaFirmar().getName());
-		mainWindow.getPdfControler().setNombreArchivoFirmado(getNombreArchivoFirmado());
+		String archivoFirmado = getNombreArchivoFirmado(documento.getArchivoAFirmar());
+		mainWindow.getPdfControler().setNombreArchivoParaFirmar(documento.getArchivoAFirmar().getName());
+		mainWindow.getPdfControler().setNombreArchivoFirmado(archivoFirmado);
 		if (mainWindow.getPdfControler().firmarDigitalmenteArchivoPdf()) {
-			myProps.getMapaDatosUsuarioFirma().put("MD5_ARCHIVO", mainWindow.getPdfControler().getMessageDig("MD5", mainWindow.getArchivoParaFirmar().getName()));
-			myProps.getMapaDatosUsuarioFirma().put("MD5_ARCHIVO_FIRMADO", mainWindow.getPdfControler().getMessageDig("MD5", getNombreArchivoFirmado()));
+			myProps.getMapaDatosUsuarioFirma().put("MD5_ARCHIVO", mainWindow.getPdfControler().getMessageDig("MD5", documento.getArchivoAFirmar().getName()));
+			myProps.getMapaDatosUsuarioFirma().put("MD5_ARCHIVO_FIRMADO", mainWindow.getPdfControler().getMessageDig("MD5", archivoFirmado));
 			myProps.getMapaDatosUsuarioFirma().put("SERIAL_CERTIFICADO", mainWindow.getPdfControler().getCertSerial());
 			myProps.getMapaDatosUsuarioFirma().put("HASH_CERTIFICADO", mainWindow.getPdfControler().getCertHash("SHA1"));
-			mainWindow.setArchivoFirmado(new File(mainWindow.getArchivoParaFirmar().getParent()+"//"+getNombreArchivoFirmado()));
-			//mostrarMensajesOk(container, myProps.getString("firmaOK"), myProps.getString("firmaDictamenes"));
+			File firmado = new File(documento.getArchivoAFirmar().getParent() + "//" + archivoFirmado);
+			documento.setArchivoFirmado(firmado);
 		} else {
-			 mostrarMensajesError(container,  myProps.getString("errorFirma") + mainWindow.getPdfControler().getSignError(), null);
+			mostrarMensajesError(container,  myProps.getString("errorFirma") + mainWindow.getPdfControler().getSignError(), null);
 			return false;
 		}
 		return true;
@@ -319,18 +343,15 @@ public class FirmaControler {
 	 * @param container recibe como parametro el contenedor de los componentes el Applet
 	 * @return
 	 */
-	public boolean uploadDoc(Container container) {
+	public boolean uploadDoc(Container container, Documento documento) {
 		HttpFileUploader fileUp = new HttpFileUploader();
 		try {
 			if (fileUp.connectURL(mainWindow.getSignProps().getUploadURL())) {
 
-				if (fileUp.doUpload(mainWindow.getArchivoFirmado().getPath(),
+				if (fileUp.doUpload(documento.getArchivoFirmado().getPath(),
 										mainWindow.getSignProps(), 
 										mainWindow.getCodigo(), 
-										mainWindow.getObjetoDominio(), 
-										mainWindow.getTipoArchivo(),
 										mainWindow.getCookie()) ) {
-					//mostrarMensajesOk(container, myProps.getString("archivoEnviadoExtosamente"),  myProps.getString("envioDictamenes"));
 					return true;
 				} else {
 					mostrarMensajesError(container, myProps.getString("errorEnvioServer") + fileUp.getHttpFileError(), null);
@@ -338,7 +359,7 @@ public class FirmaControler {
 				}
 			}
 		} catch (IOException e) {
-			mostrarMensajesError(container, "Método MainWindow.UploadDoc(): "+myProps.getString("errorEnvioDictamenServer") +" "  + mainWindow.getArchivoParaFirmar().getPath(), e)	;
+			mostrarMensajesError(container, "Método MainWindow.UploadDoc(): "+myProps.getString("errorEnvioDictamenServer") + " "  + documento.getArchivoFirmado().getPath(), e)	;
 		}
 		return false;
 	}
@@ -361,33 +382,37 @@ public class FirmaControler {
     * temporales del sistema operativo
     * @param container recibe como parametro el contenedor de los componentes el Applet
     */
-	public void descargarDocumentoParaFirmar (Container container) {
+	public File descargarDocumentoParaFirmar (Container container, String documentoUrl) {
 		HttpFileDownLoader fileDown = new HttpFileDownLoader();
-		String url=agregarParametroUrl(container,mainWindow.getSignProps().getDownloadURL(),fileDown);
-                System.out.println("Downloading from " + url);
+		String url = agregarParametroUrl(container, documentoUrl, fileDown);
+        System.out.println("Downloading from " + url);
 		if (url.startsWith("http://") || url.startsWith("https://")) {
 			if (fileDown.connectURL(url)) {			
 				try {
-					if (!fileDown.doDownload(mainWindow.getSignProps().getSourceDir(),fileDown.getLocalFileName(), mainWindow.getCookie())) {
-						mostrarMensajesError(container, myProps.getString("errorDescargarDoc")+ fileDown.getHttpFileError(), null);
-						mainWindow.setCtrls("errorDescarga");
-						return;
-					} else {
-						mainWindow.setArchivoParaFirmar(new File(mainWindow.getSignProps().getSourceDir() + File.separator + fileDown.getLocalFileName()));
-						if (FileSystem.getInstance().isExisteArchivo(mainWindow.getArchivoParaFirmar())) {
-							mainWindow.setCtrls("descargaOK");
-							//mostrarMensajesOk(container, myProps.getString("msjDescargaOK"), myProps.getString("descargaDictamen"));
-
-							//Nuevo requerimiento: Una vez finalizado la descarga del documento, debe ser visualizado en pantalla
-							//visualizarDocumento(container, mainWindow.getArchivoParaFirmar());
+					if (fileDown.doDownload(mainWindow.getSignProps().getSourceDir(), fileDown.getLocalFileName(), mainWindow.getCookie())) {
+						File archivoAFirmar = new File(mainWindow.getSignProps().getSourceDir() + File.separator + fileDown.getLocalFileName());
+						if (FileSystem.getInstance().isExisteArchivo(archivoAFirmar)) {
+							mainWindow.setEstado(VentanaPrincipal.Estados.DESCARGA_OK);
+							return archivoAFirmar;
 						}
 					}
 				} catch (IOException e) {
-                                        e.printStackTrace();
+                    e.printStackTrace();
+					mainWindow.setEstado(VentanaPrincipal.Estados.DESCARGA_ERROR);
 					mostrarMensajesError(container, myProps.getString("errorDescargarDoc")+ fileDown.getHttpFileError(), e);
+					return null;
 				}
-			}
+			} 
+			mostrarMensajesError(container, myProps.getString("errorDescargarDoc")+ fileDown.getHttpFileError(), null);
+			mainWindow.setEstado(VentanaPrincipal.Estados.DESCARGA_ERROR);
+			return null;
 		} else {
+			//TODO: Que es esto? permite firmar documentos del disco local? WTF
+			mainWindow.setEstado(VentanaPrincipal.Estados.DESCARGA_ERROR);
+			System.err.println("No se permite firmar documentos locales");
+			return null;
+
+			/*
 			String file = url.substring(0, url.lastIndexOf("?"));
 			String destFile = mainWindow.getSignProps().getSourceDir() + File.separator + file.substring(file.lastIndexOf(File.separator) + 1);  
 			FileChannel source = null;
@@ -423,28 +448,27 @@ public class FirmaControler {
 		    
 			mainWindow.setArchivoParaFirmar(new File(destFile));
 			if (FileSystem.getInstance().isExisteArchivo(mainWindow.getArchivoParaFirmar())) {
-				mainWindow.setCtrls("descargaOK");
+				mainWindow.setEstado("descargaOK");
 				//mostrarMensajesOk(container, myProps.getString("msjDescargaOK"), myProps.getString("descargaDictamen"));
 
 				//Nuevo requerimiento: Una vez finalizado la descarga del documento, debe ser visualizado en pantalla
 				visualizarDocumento(container, mainWindow.getArchivoParaFirmar());
 			}
+			*/
 		}
 	}
+	
 	/**
 	 * metodo que devuelve el nombre del archivo que va ser firmado
 	 *  Se genera el archivo de salida que es igual al nombre
 	 * del origen mas sufijo _firmado
 	 * @return
 	 */
-	public String getNombreArchivoFirmado() {
+	public String getNombreArchivoFirmado(File file) {
 
 		String destFileName = "";
-		if (mainWindow.getArchivoParaFirmar() != null) {
-			destFileName = mainWindow.getArchivoParaFirmar().getName().substring(0, mainWindow.getArchivoParaFirmar().getName().length()-4) +  "_firmado.pdf";
-		}
+		destFileName = file.getName().substring(0, file.getName().length()-4) +  "_firmado.pdf";
 		return destFileName;
-
 	}
 	
 	/**

@@ -16,6 +16,11 @@ import netscape.javascript.JSObject;
 import ar.gob.onti.firmador.model.PreguntasRespuestas;
 import ar.gob.onti.firmador.model.PropsConfig;
 import ar.gob.onti.firmador.model.PreguntaRespuesta;
+import java.io.Console;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.HashMap;
+import java.util.Map;
 
 
 /**
@@ -36,9 +41,7 @@ import ar.gob.onti.firmador.model.PreguntaRespuesta;
  * < param  name="URL_DESCARGA"	 value=”http://ip:puerto /rutaApplicacion/downloadServlet” >
  * < param  name="URL_SUBIR"	value=" http://ip:puerto /rutaApplicacion/post_subir_archivo">
  * < param  name="MOTIVO"  value="Firmar Dictamen">
- *< param  name="ID_APPLICACION"  value="ecom.ar">
  * < param  name="CODIGO"  value="23|233|PLIEGO|19" />
- * <param  name="NOMBRE_ARCHIVO" value="Acto administrativo "/>
  *   </applet>
  *
  * @author ocaceres
@@ -50,7 +53,31 @@ public class FirmaApplet extends JApplet{
 	public static final String CHROME_LINUX = "CHROME_LINUX";
 	public static final String LINUX_MAC = "LINUX_MAC";
 	
+	private VentanaPrincipal myMainWin;
 	
+	/*************************************************
+	 *****		PUBLIC INTERFACE
+	 **************************************************/
+	
+	public boolean agregarDocumento(String id, String url) {
+		PropsConfig props = myMainWin.getSignProps();
+		File file = myMainWin.getfirmaControler().descargarDocumentoParaFirmar(this, url);
+		System.out.println("File: " + (file == null ? "NULL" : file.getAbsolutePath()));
+		if (file != null) {
+			props.agregarDocumento(id, file);
+			return true;
+		} else {
+			return false;
+		}
+    }
+	
+	public boolean quitarDocumento(String id) {
+		PropsConfig props = myMainWin.getSignProps();
+		if (props.existeDocumento(id)) {
+			props.borrarDocumento(id);
+		}
+		return true;
+    }
 	/**
 	 * Metodo principal del Applet a partir del cual el este se 
 	 * inicializa y  se ejecutara
@@ -67,39 +94,46 @@ public class FirmaApplet extends JApplet{
 		String motivo = this.getParameter("MOTIVO");
 		String localidad = this.getParameter("LOCALIDAD");
 		String downloadURL = this.getParameter("URL_DESCARGA");
-		String idApplicacion = this.getParameter("ID_APPLICACION");
 		String codigo = this.getParameter("CODIGO");
 		String nombreArchivo = this.getParameter("NOMBRE_ARCHIVO");
 		String userName = this.getParameter("USERNAME");
-		String objetoDominio = this.getParameter("ID_OBJETO_DOMINIO");
-		String tipoArchivo = this.getParameter("TIPO_ARCHIVO");
 		String cookie = this.getParameter("COOKIE");
+		String multiple = this.getParameter("MULTIPLE");
+
 		
 		PreguntasRespuestas preguntas = new PreguntasRespuestas();
 		preguntas.parse(URLDecoder.decode(this.getParameter("PREGUNTAS")));
 			
-		VentanaPrincipal myMainWin= new VentanaPrincipal(this,browser);
+		myMainWin= new VentanaPrincipal(this,browser);
 		myMainWin.inicializar();
-		setSize(600, 300);
-		myMainWin.setIdApplicacion(idApplicacion);
+		setSize(400, 120);
 		myMainWin.setCodigo(codigo);
-		myMainWin.setObjetoDominio(objetoDominio);
-		myMainWin.setTipoArchivo(tipoArchivo);
 		myMainWin.setCookie(cookie);
 		PropsConfig config= myMainWin.getSignProps();
 		config.setNombreArchivo(nombreArchivo);
 		config.setUploadURL(uploadURL);
-		config.setDownloadURL(downloadURL);
 		config.setLocation(localidad);
 		config.setReason(motivo);
 		config.setUserName(userName);
 		config.setPreguntas(preguntas);
+		config.setMultiple(multiple != null && multiple.equalsIgnoreCase("true"));
 		config.setVisible(true);
 		myMainWin.initProps(this);
 		myMainWin.initLogFile(this);
 		myMainWin.initSigner(this);
-
-		myMainWin.getfirmaControler().descargarDocumentoParaFirmar( this);
+		
+		if (! config.isMultiple())  {
+			File file = myMainWin.getfirmaControler().descargarDocumentoParaFirmar(this, downloadURL);
+			if (file != null) {
+				config.agregarDocumentoUnico(file);
+			}		
+		}
+		
+		try {
+			getAppletContext().showDocument(new URL("javascript:appletLoaded()"));
+		} catch (MalformedURLException e) {
+			System.err.println("Failed to call JavaScript function appletLoaded()");
+		}		
 	}	
 	
 	/**

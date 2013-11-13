@@ -36,15 +36,30 @@ import netscape.javascript.*; // add plugin.jar to classpath during compilation
 import ar.gob.onti.firmador.controler.FileSystem;
 import ar.gob.onti.firmador.controler.FirmaControler;
 import ar.gob.onti.firmador.controler.PdfControler;
+import ar.gob.onti.firmador.model.Documento;
 import ar.gob.onti.firmador.model.PropsConfig;
 import java.awt.Dimension;
+import java.util.Iterator;
+import java.util.Map;
 import javax.swing.JProgressBar;
+
+
+
 /**
  * Clase contenedora de los componetes de la Applicacion
  * @author ocaceres
  *
  */
 public class VentanaPrincipal  {
+	public enum Estados {
+		DESCARGA_ERROR,
+		DESCARGA_OK,
+		FIRMA_DOC_ERROR,
+		FIRMA_DOC_OK,
+		SUBIDA_DOC_OK,
+		SUBIDA_DOC_ERROR
+	}
+	
 	private static final long serialVersionUID = 1L;
 	private JLabel jLblPDFile;
 	private JLabel mensajeFirmaOk;
@@ -59,8 +74,6 @@ public class VentanaPrincipal  {
 	private JTextField certSelecionado;
 	private Container container;
 	private PropsConfig myProps=null;
-	private File 		archivoParaFirmar;
-	private File 		archivoFirmado;
 	private Logger 		appLogFile;
 	private FileHandler hndLog=null;
 	private PdfControler   pdfControler;
@@ -84,12 +97,7 @@ public class VentanaPrincipal  {
 	public FirmaControler getfirmaControler() {
 		return firmaControler;
 	}
-	public File getArchivoParaFirmar() {
-		return archivoParaFirmar;
-	}
-	public void setArchivoParaFirmar(File archivoParaFirmar) {
-		this.archivoParaFirmar = archivoParaFirmar;
-	}
+
 	/**
 	 * JTextField del certificado selecionado
 	 * @return
@@ -132,51 +140,7 @@ public class VentanaPrincipal  {
 		return cookie;
 	}
 
-	/**
-	 * Objeto Dominio que recibe el Applet de la aplicaion que lo esta jecutando
-	 * @return
-	 */
-	public String getObjetoDominio() {
-		return objetoDominio;
-	}
 
-	/**
-	 * @param objetoDominio
-	 */
-	public void setObjetoDominio(String objetoDominio) {
-		this.objetoDominio = objetoDominio;
-	}
-	
-	/**
-	 * Tipo Archivo que recibe el Applet de la aplicaion que lo esta jecutando
-	 * @return
-	 */
-	public String getTipoArchivo() {
-		return tipoArchivo;
-	}
-
-	/**
-	 * 
-	 * @param tipoArchivo
-	 */
-	public void setTipoArchivo(String tipoArchivo) {
-		this.tipoArchivo = tipoArchivo;
-	}
-
-	/**
-	 * Id de la Applicaicon que esta ejecutando el Applet
-	 * @return
-	 */
-	public String getIdApplicacion() {
-		return idApplicacion;
-	}
-	/**
-	 * 
-	 * @param idApplicacion
-	 */
-	public void setIdApplicacion(String idApplicacion) {
-		this.idApplicacion = idApplicacion;
-	}
 	/**
 	 * Constructor de la ventanaprincipal
 	 * debe recibir como paramtro el Applet que se esta ejecutando 
@@ -188,10 +152,8 @@ public class VentanaPrincipal  {
 		super();
 		myProps =PropsConfig.getInstance();
 		myProps.setBrowser(browser);
-		archivoParaFirmar = null;
 		appLogFile = null;
 		hndLog = null;
-		archivoFirmado=null;
 		this.container=container;
 	}
     public void inicializar(){
@@ -217,21 +179,7 @@ public class VentanaPrincipal  {
 
 		container.add(panelPrincipal);
     }
-	
-	/**
-	 * Archivo pdf  que se ha firmado
-	 * @return
-	 */
-	public File getArchivoFirmado() {
-		return archivoFirmado;
-	}
-	/**
-	 * 
-	 * @param archivoFirmado
-	 */
-	public void setArchivoFirmado(File archivoFirmado) {
-		this.archivoFirmado = archivoFirmado;
-	}
+
 	/**
 	 * Etiqueta del titulo
 	 * @return
@@ -294,17 +242,27 @@ public class VentanaPrincipal  {
 	}
 
 
-	protected void subirPdf()
+	protected void subirPdfs()
 	{
 		showProgress(myProps.getString("progresoSubiendoArchivo"));
-		if(firmaControler.subirDocumento(container)){
-				try {
-					JSObject window = JSObject.getWindow((Applet) container);
-					window.call("firmaOk", new Object[] {})   ;
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-
+		Iterator it = getSignProps().getDocumentos().entrySet().iterator();
+		boolean ok = true;
+		for (Map.Entry<String, Documento> entry : getSignProps().getDocumentos().entrySet()) {
+			if (!firmaControler.subirDocumento(container, entry.getValue())){
+				ok = false;
+				break;
+			}
+		}
+		if (ok) {
+			setEstado(Estados.SUBIDA_DOC_OK);
+		} else {
+			setEstado(Estados.SUBIDA_DOC_ERROR);
+			try {
+				JSObject window = JSObject.getWindow((Applet) container);
+				window.call("firmaOk", new Object[] {})   ;
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
 		}
 		hideProgress();
 	}
@@ -320,15 +278,12 @@ public class VentanaPrincipal  {
 			botonVerPdf = new javax.swing.JButton();
 			botonVerPdf.setText(myProps.getString("visualizar"));
 			botonVerPdf.setFont(new java.awt.Font(letra, Font.PLAIN, 12));
-			//botonVerPdf.setIcon(visualizarIcon);
-			//botonVerPdf.setBackground(Color.decode(color));
-			//botonVerPdf.setForeground(Color.decode("#888888"));
-			//botonVerPdf.setBorder(javax.swing.BorderFactory.createLineBorder(Color.decode(color)));
 			botonVerPdf.setToolTipText("Visualizar el PDF en un programa externo, por ejemplo Adobe Reader");
-			botonVerPdf.setEnabled(true);
+			botonVerPdf.setVisible(false);			
 			botonVerPdf.addActionListener(new java.awt.event.ActionListener() {
 				public void actionPerformed(java.awt.event.ActionEvent evt) {
-					firmaControler.visualizarDocumento(container, archivoParaFirmar);
+					//getSignProps().getAppLogFile()
+					firmaControler.visualizarDocumento(container, getSignProps().getDocumentoUnico().getArchivoAFirmar());
 				}
 			});
 		}
@@ -343,21 +298,16 @@ public class VentanaPrincipal  {
 		if(botonFirmar==null){
 			botonFirmar = new javax.swing.JButton();
 			botonFirmar.setText(myProps.getString("firmar"));
-			//botonFirmar.setIcon(firmarIcon);
 			botonFirmar.setFont(new java.awt.Font(letra, Font.BOLD, 12));
-			//botonFirmar.setHorizontalTextPosition(AbstractButton.CENTER);
-			//botonFirmar.setVerticalTextPosition(AbstractButton.BOTTOM);
-
-			//botonFirmar.setBackground(Color.decode(color));
-			//botonFirmar.setForeground(Color.decode("#888888"));
-			//botonFirmar.setBorder(javax.swing.BorderFactory.createLineBorder(Color.decode(color)));
+			botonFirmar.setEnabled(false);
 			AccessController.doPrivileged(new PrivilegedAction<Object>() {
 				public Object run()
 				{	
 					botonFirmar.addActionListener(new java.awt.event.ActionListener() {
 						public void actionPerformed(java.awt.event.ActionEvent evt) {
 							showProgress(myProps.getString("progresoAccediendoToken"));
-							firmaControler.firmarDocumento(container);
+							firmaControler.firmarDocumentos(container, getSignProps().getDocumentos());
+					
 						}
 					});
 					return null;
@@ -423,23 +373,38 @@ public class VentanaPrincipal  {
 	 *  deacuerdo a las acciones ralizadas
 	 * @param operation
 	 */
-	public void setCtrls(String operation) {
+	public void setEstado(Estados estado) {
+		System.out.println("Set Estado: " + estado.name());
+		switch (estado) {
+			case DESCARGA_ERROR:
+				botonVerPdf.setEnabled(false);
+				botonFirmar.setEnabled(false);
+				break;		
+			case DESCARGA_OK:
+				botonFirmar.setEnabled(true);
+				botonFirmar.setVisible(true);
+				if (! getSignProps().isMultiple()) {
+					botonVerPdf.setVisible(true);
+					botonVerPdf.setEnabled(true);
+				}
+				break;					
+			case FIRMA_DOC_OK:
+				hideProgress();
+				botonVerPdf.setEnabled(false);
+				botonFirmar.setEnabled(false);//false
+				subirPdfs();
+				break;
+			case FIRMA_DOC_ERROR:
+				hideProgress();
+				break;
+			case SUBIDA_DOC_OK:
+				botonFirmar.setEnabled(false);
+				botonFirmar.setText(myProps.getString("firmado"));			
+				botonVerPdf.setVisible(false);
+				break;
 
-		if (operation.equals("errorDescarga")) {
-			botonVerPdf.setEnabled(false);
-			botonFirmar.setEnabled(false);
-		} else if (operation.equals("firmaDocOk")) {
-			hideProgress();
-			botonVerPdf.setEnabled(false);
-			botonFirmar.setEnabled(false);//false
-			subirPdf();
-		} else if (operation.equals("firmaDocError")) {
-			hideProgress();
-		} else if (operation.equals("subidaDocOk")) {
-			botonFirmar.setEnabled(false);
-			botonFirmar.setText(myProps.getString("firmado"));			
-			botonVerPdf.setVisible(false);
 		}
+
 	}
 	/**
 	 * inicializa los  controler y la configuarcion necesaria
@@ -477,7 +442,9 @@ public class VentanaPrincipal  {
 	 */
 	public boolean initProps(Container container) {
 		boolean retValue = true;
-
+		if (getSignProps().isMultiple()) {
+			updateBotonFirmar();
+		}
 		if (!myProps.readProps() ) {
 			JOptionPane.showMessageDialog(container,
 					"Problemas en la configuración de la aplicación\n"
@@ -630,6 +597,10 @@ public class VentanaPrincipal  {
 		progressBar.setVisible(false);
 	}
 
+	public void updateBotonFirmar() {
+		getBotonFirmar().setText(myProps.getString("firmarMultiple") + " (0)"); 
+	}
+			
 
 
 

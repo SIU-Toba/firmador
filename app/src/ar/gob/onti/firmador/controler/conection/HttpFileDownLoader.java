@@ -89,7 +89,7 @@ public class HttpFileDownLoader extends HttpFileConnection{
 			}
 			return true;
 		} catch (FileNotFoundException e) {
-		
+			e.printStackTrace();
 			if (inStream == null) {
 				downloadError += "Archivo no encontrado en el servidor (" + localFileName + ")";
 			} else if (outStream == null) {
@@ -100,7 +100,7 @@ public class HttpFileDownLoader extends HttpFileConnection{
 			setHttpFileError(downloadError);
 			return false;
 		}catch (IOException e) {
-
+			e.printStackTrace();
 			downloadError += "Error al intentar leer el archivo del servidor"; 
 			setHttpFileError(downloadError);
 			return false;

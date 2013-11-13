@@ -4,6 +4,8 @@
             <actionName>build</actionName>
             <goals>
                 <goal>-q</goal>
+                <goal>clean</goal>
+                <goal>compile</goal>
                 <goal>install</goal>
             </goals>
             <properties>

@@ -20,6 +20,8 @@ import java.util.logging.Logger;
  *
  */
 public final class PropsConfig {
+	public static final String DOCUMENTO_UNICO_ID = "ID_UNICO";
+
 	private static PropsConfig instance=null;
 	private ResourceBundle myProps=null;
 	private String nombreArchivo="";
@@ -38,6 +40,7 @@ public final class PropsConfig {
 	private PreguntasRespuestas preguntas;
 	private String objetoDominio = "";
 	private String tipoArchivo = "";
+	private boolean multiple = false;
 	//Autoridades certificantes
 	private List<String> autoCertificantes;
         private List<String> trustedCertificates;
@@ -46,9 +49,26 @@ public final class PropsConfig {
 	// Conexion servidor
 	private String uploadURL = "";
 	private String uplBoundary = "";
-	private String downloadURL = "";
 	// Mensaje error
     private String propsError;
+	
+	private HashMap<String, Documento> documentos;
+
+	
+	private PropsConfig() {
+		sourceDir = "";
+		reason = "";
+		location = "";
+		uploadURL = "";
+		uplBoundary = "";
+		propsError = "";
+		autoCertificantes= new ArrayList<String>();
+                trustedCertificates = new ArrayList<String>();
+		this.myProps = ResourceBundle.getBundle("properties.firma",new Locale("es","AR"));
+		documentos = new HashMap<String, Documento>();
+
+	}
+	
     public boolean isVisible() {
 		return visible;
 	}
@@ -61,8 +81,6 @@ public final class PropsConfig {
 	public void setAppLogFile(Logger appLogFile) {
 		this.appLogFile = appLogFile;
 	}
-
-
 
 	public static synchronized  PropsConfig getInstance() {
 		if (PropsConfig.instance == null){
@@ -110,12 +128,20 @@ public final class PropsConfig {
 		this.preguntas = preguntas;
 	}
 
+	public void setMultiple(boolean multiple) {
+		this.multiple = multiple;
+	}
+	
+	public boolean isMultiple() {
+		return multiple;
+	}
+			
 	
 	public List<String> getAutoCertificantes() {
 		return autoCertificantes;
 	}
 
-        public List<String> getTrustedCertificates() {
+    public List<String> getTrustedCertificates() {
 		return trustedCertificates;
 	}
 
@@ -132,9 +158,51 @@ public final class PropsConfig {
 		this.browser = browser;
 	}
 
+	//------- MANEJO DE DOCUMENTOS
+	public boolean existeDocumento(String id) {
+		return documentos.containsKey(id);
+	}
 
-
-
+	public void borrarDocumento(String id) {
+		if (existeDocumento(id)) {
+			if (documentos.get(id).getArchivoAFirmar().exists()) {
+				try {
+					documentos.get(id).getArchivoAFirmar().delete();
+				} catch (SecurityException e) {
+					//No importa mucho si no pudo borrar el archivo, es una carpeta temporal...
+					e.printStackTrace();
+				}
+			}
+			if (documentos.get(id).getArchivoFirmado() != null && documentos.get(id).getArchivoFirmado().exists()) {
+				try {
+					documentos.get(id).getArchivoFirmado().delete();
+				} catch (SecurityException e) {
+					//No importa mucho si no pudo borrar el archivo, es una carpeta temporal...
+					e.printStackTrace();
+				}
+			}			
+		}
+		documentos.remove(id);
+    }
+	
+	public void agregarDocumento(String id, File archivo) {
+		Documento documento = new Documento(archivo);
+		documentos.put(id, documento);
+	}
+	
+	public void agregarDocumentoUnico(File archivo) {
+		agregarDocumento(DOCUMENTO_UNICO_ID, archivo);
+	}
+	
+	public Documento getDocumentoUnico() {
+		return documentos.get(DOCUMENTO_UNICO_ID);
+	}
+	
+	public HashMap<String, Documento> getDocumentos() {
+		return documentos;
+	}
+			
+	//------------------------------
 
 	public String getReason() {
 		return reason;
@@ -169,14 +237,6 @@ public final class PropsConfig {
 		this.uplBoundary = uplBoundary;
 	}
 
-	public String getDownloadURL() {
-		return downloadURL;
-	}
-
-	public void setDownloadURL(String downloadURL) {
-		this.downloadURL = downloadURL;
-	}
-
 
 
 	public void setPropsError(String propsError) {
@@ -185,19 +245,7 @@ public final class PropsConfig {
     public String getString(String clave){
     	return this.myProps.getString(clave);
     }
-	private PropsConfig() {
-		sourceDir = "";
-		reason = "";
-		location = "";
-		uploadURL = "";
-		uplBoundary = "";
-		downloadURL = "";
-		propsError = "";
-		autoCertificantes= new ArrayList<String>();
-                trustedCertificates = new ArrayList<String>();
-		this.myProps = ResourceBundle.getBundle("properties.firma",new Locale("es","AR"));
 
-	}
 	
 	
 	/**
