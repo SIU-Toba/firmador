@@ -47,7 +47,7 @@ public class FirmaControler {
 	private Icon errorIcon = null;
 	private PropsConfig myProps=null;
 	private String error="";
-
+	private boolean arbolCargado = false;
 	
 	public String getError() {
 		return error;
@@ -96,6 +96,8 @@ public class FirmaControler {
 	
 	
 	public void firmarDocumentos(Container container, HashMap<String, Documento> documentos) {
+		arbolCargado = false;
+		mainWindow.getPdfControler().cleanCurrentKeyStoreData();
 		boolean ok = true;
 		for (Map.Entry<String, Documento> entry : documentos.entrySet()) {
 			if (! firmarDocumento(container, entry.getValue())) {
@@ -128,6 +130,7 @@ public class FirmaControler {
 	 */
 	public boolean firmarDocumento(Container container, Documento documento) {
 		if (!FileSystem.getInstance().isExisteArchivo(documento.getArchivoAFirmar())) {
+			System.err.println("No existe el archivo " + documento.getArchivoAFirmar().getAbsolutePath());
 			mostrarMensajesError(container, myProps.getString("errorArchivoParaFirmarInexistente"), null);
 			return false;
 		}
@@ -200,9 +203,11 @@ public class FirmaControler {
 	 * @return
 	 */
     public boolean cargarArbolDeCertificados(Container container){
-
+		if (mainWindow.getSignProps().isMultiple() && arbolCargado) {
+			return true;
+		}
+		
     	if (!mainWindow.getPdfControler().existeCertificate()) {
-
 			StringBuffer tokenPin = new StringBuffer();
 //			 Se pide el ingreso del PIN en caso de token
 /*
@@ -262,15 +267,16 @@ public class FirmaControler {
 	 * @throws IOException 
 	 */
 	public boolean firmarDocumentoPdf(Container container, Documento documento) throws IOException {
-    	mainWindow.getPdfControler().cleanCurrentKeyStoreData();
-    	
 		if(!mostrarListaDePreguntas(container)){
 			return false;
 		}
-    	
 		if(!cargarArbolDeCertificados(container)){
 			return false;
+		} else {
+			arbolCargado = true;
 		}
+		mainWindow.showProgress(myProps.getString("progresoFirmando"));
+		
 		String archivoFirmado = getNombreArchivoFirmado(documento.getArchivoAFirmar());
 		mainWindow.getPdfControler().setNombreArchivoParaFirmar(documento.getArchivoAFirmar().getName());
 		mainWindow.getPdfControler().setNombreArchivoFirmado(archivoFirmado);
@@ -315,8 +321,10 @@ public class FirmaControler {
 				return false;
 			}
 		} catch (KeyStoreException e) {
+			e.printStackTrace();;
 			 mostrarMensajesError(mainWindow.getContainer(),  myProps.getString("errorBrowseCerts"), e);
 		} catch (UnsupportedEncodingException e) {
+			e.printStackTrace();
 			 mostrarMensajesError(mainWindow.getContainer(),  myProps.getString("errorBrowseCerts"), e);
 		}
 		return true;
@@ -348,7 +356,7 @@ public class FirmaControler {
 		try {
 			if (fileUp.connectURL(mainWindow.getSignProps().getUploadURL())) {
 
-				if (fileUp.doUpload(documento.getArchivoFirmado().getPath(),
+				if (fileUp.doUpload(documento,
 										mainWindow.getSignProps(), 
 										mainWindow.getCodigo(), 
 										mainWindow.getCookie()) ) {
@@ -359,6 +367,7 @@ public class FirmaControler {
 				}
 			}
 		} catch (IOException e) {
+			e.printStackTrace();
 			mostrarMensajesError(container, "Método MainWindow.UploadDoc(): "+myProps.getString("errorEnvioDictamenServer") + " "  + documento.getArchivoFirmado().getPath(), e)	;
 		}
 		return false;
@@ -392,69 +401,22 @@ public class FirmaControler {
 					if (fileDown.doDownload(mainWindow.getSignProps().getSourceDir(), fileDown.getLocalFileName(), mainWindow.getCookie())) {
 						File archivoAFirmar = new File(mainWindow.getSignProps().getSourceDir() + File.separator + fileDown.getLocalFileName());
 						if (FileSystem.getInstance().isExisteArchivo(archivoAFirmar)) {
-							mainWindow.setEstado(VentanaPrincipal.Estados.DESCARGA_OK);
 							return archivoAFirmar;
 						}
 					}
 				} catch (IOException e) {
                     e.printStackTrace();
-					mainWindow.setEstado(VentanaPrincipal.Estados.DESCARGA_ERROR);
 					mostrarMensajesError(container, myProps.getString("errorDescargarDoc")+ fileDown.getHttpFileError(), e);
 					return null;
 				}
 			} 
 			mostrarMensajesError(container, myProps.getString("errorDescargarDoc")+ fileDown.getHttpFileError(), null);
-			mainWindow.setEstado(VentanaPrincipal.Estados.DESCARGA_ERROR);
 			return null;
 		} else {
 			//TODO: Que es esto? permite firmar documentos del disco local? WTF
 			mainWindow.setEstado(VentanaPrincipal.Estados.DESCARGA_ERROR);
 			System.err.println("No se permite firmar documentos locales");
 			return null;
-
-			/*
-			String file = url.substring(0, url.lastIndexOf("?"));
-			String destFile = mainWindow.getSignProps().getSourceDir() + File.separator + file.substring(file.lastIndexOf(File.separator) + 1);  
-			FileChannel source = null;
-		    FileChannel destination = null;
-
-		    try {
-		        source = new FileInputStream(file).getChannel();
-		        destination = new FileOutputStream(destFile).getChannel();
-		        destination.transferFrom(source, 0, source.size());
-		    } catch (FileNotFoundException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-		    finally {
-		        if(source != null) {
-		            try {
-						source.close();
-					} catch (IOException e) {
-						e.printStackTrace();
-					}
-		        }
-		        if(destination != null) {
-		            try {
-						destination.close();
-					} catch (IOException e) {
-						e.printStackTrace();
-					}
-		        }
-		    }
-		    
-			mainWindow.setArchivoParaFirmar(new File(destFile));
-			if (FileSystem.getInstance().isExisteArchivo(mainWindow.getArchivoParaFirmar())) {
-				mainWindow.setEstado("descargaOK");
-				//mostrarMensajesOk(container, myProps.getString("msjDescargaOK"), myProps.getString("descargaDictamen"));
-
-				//Nuevo requerimiento: Una vez finalizado la descarga del documento, debe ser visualizado en pantalla
-				visualizarDocumento(container, mainWindow.getArchivoParaFirmar());
-			}
-			*/
 		}
 	}
 	
@@ -495,6 +457,7 @@ public class FirmaControler {
 				mostrarMensajesError(container, "visualizarDocumento()"+myProps.getString("errorVerDocumento"), null);
 			}
 		} catch (IOException e) {
+			e.printStackTrace();
 			mostrarMensajesError(container, "visualizarDocumento()"+myProps.getString("errorVerDocumento"), e);
 		}
 	}	

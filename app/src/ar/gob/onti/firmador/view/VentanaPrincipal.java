@@ -50,21 +50,25 @@ import javax.swing.JProgressBar;
  * @author ocaceres
  *
  */
-public class VentanaPrincipal  {
+public class VentanaPrincipal implements Runnable  {
+
+	
 	public enum Estados {
 		DESCARGA_ERROR,
 		DESCARGA_OK,
 		FIRMA_DOC_ERROR,
 		FIRMA_DOC_OK,
 		SUBIDA_DOC_OK,
-		SUBIDA_DOC_ERROR
+		SUBIDA_DOC_ERROR,
+		
+		DOCUMENTO_AGREGADO,
+		DOCUMENTO_QUITADO
 	}
 	
 	private static final long serialVersionUID = 1L;
 	private JLabel jLblPDFile;
 	private JLabel mensajeFirmaOk;
 	private JPanel panelPrincipal =null;
-	private JPanel panelProgress;
 
 	private JLabel labelTitulo;
 	private JLabel labelIconoOk;
@@ -78,18 +82,14 @@ public class VentanaPrincipal  {
 	private FileHandler hndLog=null;
 	private PdfControler   pdfControler;
 	private FirmaControler firmaControler;
-	private ImageIcon visualizarIcon = null;
-	private ImageIcon firmarIcon =  null;
 	private ImageIcon tituloIcon =  null;	
 	private ImageIcon okIcon =  null;
-	private String idApplicacion;
 	private String codigo;
-	private String objetoDominio;
-	private String tipoArchivo;
 	private String letra="Arial";
-	private String color="#ffffff";
 	private String cookie;
 	
+	private Thread downloadThread;
+
 	/**
 	 * Controlador que se encarga de manejar las acciones que realiza el usuario
 	 * @return
@@ -156,6 +156,7 @@ public class VentanaPrincipal  {
 		hndLog = null;
 		this.container=container;
 	}
+	
     public void inicializar(){
     	// Se instancia el objeto de firma y se trabaja sobre
 		// el documento origen, generando en el documento de
@@ -169,13 +170,10 @@ public class VentanaPrincipal  {
 		pdfControler.setProps(PropsConfig.getInstance());
 		firmaControler= new FirmaControler(this);
 		ClassLoader cl = this.getClass().getClassLoader();
-		visualizarIcon =  new ImageIcon(cl.getResource("images/view.png"));	
-		firmarIcon =  new ImageIcon(cl.getResource("images/sign.png"));
 		tituloIcon =  new ImageIcon(cl.getResource("images/Logosiu1.png"));
 		okIcon =  new ImageIcon(cl.getResource("images/ok.png"));
 		
 		crearGroupLayout();
-
 
 		container.add(panelPrincipal);
     }
@@ -245,7 +243,6 @@ public class VentanaPrincipal  {
 	protected void subirPdfs()
 	{
 		showProgress(myProps.getString("progresoSubiendoArchivo"));
-		Iterator it = getSignProps().getDocumentos().entrySet().iterator();
 		boolean ok = true;
 		for (Map.Entry<String, Documento> entry : getSignProps().getDocumentos().entrySet()) {
 			if (!firmaControler.subirDocumento(container, entry.getValue())){
@@ -255,14 +252,14 @@ public class VentanaPrincipal  {
 		}
 		if (ok) {
 			setEstado(Estados.SUBIDA_DOC_OK);
-		} else {
-			setEstado(Estados.SUBIDA_DOC_ERROR);
 			try {
 				JSObject window = JSObject.getWindow((Applet) container);
 				window.call("firmaOk", new Object[] {})   ;
 			} catch (Exception e) {
 				e.printStackTrace();
-			}
+			}			
+		} else {
+			setEstado(Estados.SUBIDA_DOC_ERROR);
 		}
 		hideProgress();
 	}
@@ -305,9 +302,11 @@ public class VentanaPrincipal  {
 				{	
 					botonFirmar.addActionListener(new java.awt.event.ActionListener() {
 						public void actionPerformed(java.awt.event.ActionEvent evt) {
-							showProgress(myProps.getString("progresoAccediendoToken"));
-							firmaControler.firmarDocumentos(container, getSignProps().getDocumentos());
-					
+							if (getSignProps().isMultiple() && ! getSignProps().getDocumentosDescargados()) {
+								descargarDocumentos();
+							} else {
+								firmarDocumentos();
+							}
 						}
 					});
 					return null;
@@ -316,7 +315,43 @@ public class VentanaPrincipal  {
 		}
 		return botonFirmar;
 	}
+	
+	public void descargarDocumentos() {
+		getBotonFirmar().setEnabled(false);
+		showProgress(myProps.getString("progresoBajandoArchivo"));
+		downloadThread = new Thread(this);
+		downloadThread.start();
+	}
+	
+		@Override
+	public void run() {
+		//Download Thread			
+		boolean ok = true;
+		for (Map.Entry<String, Documento> entry : getSignProps().getDocumentos().entrySet()) {
+			File file = getfirmaControler().descargarDocumentoParaFirmar(
+														getContainer(), 
+														entry.getValue().getUrl());
+			if (file == null) {
+				ok = false;
+				break;
+			}
+			entry.getValue().setArchivoAFirmar(file);
+		}				
+		if (ok) {
+			getSignProps().setDocumentosDescargados(true);
+			setEstado(VentanaPrincipal.Estados.DESCARGA_OK);
+		} else {
+			getSignProps().setDocumentosDescargados(false);
+			setEstado(VentanaPrincipal.Estados.DESCARGA_ERROR);
+		}
+	}
 
+	
+	public void firmarDocumentos() {
+		showProgress(myProps.getString("progresoAccediendoToken"));
+		firmaControler.firmarDocumentos(container, getSignProps().getDocumentos());
+	}
+	
 	/**
 	 * crea el GroupLayout de como se mostrara los componetes en el applet
 	 */
@@ -342,7 +377,7 @@ public class VentanaPrincipal  {
 						.addComponent(getProgressBar(),GroupLayout.PREFERRED_SIZE, 180,GroupLayout.PREFERRED_SIZE))
 				.addGroup(myLayout.createSequentialGroup()
 						.addGap(marginLeft,marginLeft,marginLeft)
-						.addComponent(getBotonFirmar(),GroupLayout.PREFERRED_SIZE, 180,GroupLayout.PREFERRED_SIZE)
+						.addComponent(getBotonFirmar(),GroupLayout.PREFERRED_SIZE, 240,GroupLayout.PREFERRED_SIZE)
 						.addGap(20,20,20)
 						.addComponent(getBotonVerPdf(),GroupLayout.PREFERRED_SIZE, 180,GroupLayout.PREFERRED_SIZE))				
 
@@ -376,18 +411,30 @@ public class VentanaPrincipal  {
 	public void setEstado(Estados estado) {
 		System.out.println("Set Estado: " + estado.name());
 		switch (estado) {
+			case DOCUMENTO_AGREGADO:
+			case DOCUMENTO_QUITADO:
+				int cantidad = getSignProps().getCantidadDocumentos();
+				updateBotonFirmar(cantidad);
+				break;
 			case DESCARGA_ERROR:
+				hideProgress();
 				botonVerPdf.setEnabled(false);
 				botonFirmar.setEnabled(false);
-				break;		
+				break;
 			case DESCARGA_OK:
-				botonFirmar.setEnabled(true);
+				hideProgress();
+				if (! getSignProps().isMultiple()) {
+					botonFirmar.setEnabled(true);
+				}
 				botonFirmar.setVisible(true);
 				if (! getSignProps().isMultiple()) {
 					botonVerPdf.setVisible(true);
 					botonVerPdf.setEnabled(true);
+				} else {
+					//En firma masiva, luego de descargarlos, hay que firmarlos
+					firmarDocumentos();
 				}
-				break;					
+				break;
 			case FIRMA_DOC_OK:
 				hideProgress();
 				botonVerPdf.setEnabled(false);
@@ -399,7 +446,7 @@ public class VentanaPrincipal  {
 				break;
 			case SUBIDA_DOC_OK:
 				botonFirmar.setEnabled(false);
-				botonFirmar.setText(myProps.getString("firmado"));			
+				botonFirmar.setText(myProps.isMultiple() ? myProps.getString("firmados") : myProps.getString("firmado"));			
 				botonVerPdf.setVisible(false);
 				break;
 
@@ -443,7 +490,7 @@ public class VentanaPrincipal  {
 	public boolean initProps(Container container) {
 		boolean retValue = true;
 		if (getSignProps().isMultiple()) {
-			updateBotonFirmar();
+			updateBotonFirmar(0);
 		}
 		if (!myProps.readProps() ) {
 			JOptionPane.showMessageDialog(container,
@@ -589,16 +636,22 @@ public class VentanaPrincipal  {
 	}
 
 	public void showProgress(String message) {
-		progressBar.setVisible(true);
-		progressBar.setString(message);
+		getProgressBar().setVisible(true);
+		getProgressBar().setString(message);
 	}
 	
 	public void hideProgress() {
 		progressBar.setVisible(false);
 	}
 
-	public void updateBotonFirmar() {
-		getBotonFirmar().setText(myProps.getString("firmarMultiple") + " (0)"); 
+	public void updateBotonFirmar(int cantidad) {
+		if (cantidad > 0) {
+			botonFirmar.setText(myProps.getString("firmarMultiple") + " (" + cantidad + ")");
+			botonFirmar.setEnabled(true);
+		} else {
+			botonFirmar.setText(myProps.getString("firmarMultipleEsperar"));
+			botonFirmar.setEnabled(false);
+		}
 	}
 			
 

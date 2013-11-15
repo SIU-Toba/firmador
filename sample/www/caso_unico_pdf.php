@@ -19,7 +19,7 @@ $firmador->set_guardar_sesion_en_php();
 //-- CASO BASE: Generar applet
 //---------------------------------
 if (! isset($_GET['accion'])) {
-	$firmador->set_dimension(400, 120);
+	$firmador->set_dimension(500, 120);
 	$firmador->set_motivo("Motivo de la firma");
 	$url_actual = $firmador->get_url_base_actual(). $_SERVER['REQUEST_URI'];
 	$firmador->generar_applet("firmador.jar", 

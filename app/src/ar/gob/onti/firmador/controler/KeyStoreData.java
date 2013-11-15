@@ -189,8 +189,10 @@ public class KeyStoreData {
 				byte[] fingerPrint = md.digest();
 				strHashNum = HexUtils.byteArrayToHexString(fingerPrint);
 			} catch (NoSuchAlgorithmException e) {
+				e.printStackTrace();
 				cargarMensajeDeError("", "getCertHash", e);
 			} catch (CertificateEncodingException e) {
+				e.printStackTrace();
 				cargarMensajeDeError("", "getCertHash", e);
 			} 
 		}	
@@ -230,10 +232,12 @@ public class KeyStoreData {
 
 			return status.equals(CertStatus.GOOD);
 		} catch (CertPathValidatorException e) {
+			e.printStackTrace();
 			System.out.println("OCSP CERT EXCEPTION:" + e.getMessage());
 			// TODO Auto-generated catch block
 			return false;
 		} catch (IOException e) {
+			e.printStackTrace();
 			System.out.println("OCSP IO EXCEPTION:" + e.getMessage());
 			// TODO Auto-generated catch block
 			return false;

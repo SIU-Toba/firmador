@@ -4,7 +4,7 @@ class firmador_pdf
 {
 	protected $sesion_handler = 'php';
     protected $motivo = "Firmar PDF";
-	protected $dimension_ancho = 400;
+	protected $dimension_ancho = 500;
 	protected $dimension_alto = 120;
 	
 	protected $db = null;

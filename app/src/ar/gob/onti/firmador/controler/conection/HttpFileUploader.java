@@ -4,6 +4,7 @@ package ar.gob.onti.firmador.controler.conection;
  * author: mpin
  * owner : ONTI
  */
+import ar.gob.onti.firmador.model.Documento;
 import java.io.BufferedReader;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
@@ -178,16 +179,14 @@ public class HttpFileUploader extends HttpFileConnection {
 	 * @return
 	 * @throws IOException 
 	 */
-	public boolean doUpload(String fileName, PropsConfig myProps,String codigo, String cookie) throws IOException {
+	public boolean doUpload(Documento documento, PropsConfig myProps,String codigo, String cookie) throws IOException {
 		String errorBuffer="";
-
+		String fileName = documento.getArchivoFirmado().getPath();
 		try {			
 			PostMethod post = new PostMethod(myProps.getUploadURL());
 			Part[] parts = {
-					//new StringPart("idDominio", objetoDominio),
-					//new StringPart("tipoDeArchivo", tipoArchivo),
 					new StringPart("codigo", codigo),
-					//new StringPart("userName", myProps.getUserName()),
+					new StringPart("id", documento.getId()),
 					new FilePart("md5_fileSigned", new File(fileName))};
 			post.setRequestEntity( new MultipartRequestEntity(parts, post.getParams()) );
 			HttpClient client = new HttpClient();
@@ -220,7 +219,7 @@ public class HttpFileUploader extends HttpFileConnection {
 		}
 		catch (SocketException e) {
             e.printStackTrace();
-			return doUploadApache(fileName, myProps, codigo);
+			return doUploadApache(documento, myProps, codigo);
 		}
 		catch (Exception e) {
             e.printStackTrace();            
@@ -228,72 +227,6 @@ public class HttpFileUploader extends HttpFileConnection {
             return false;
         }
         
-		/*
-		DataOutputStream dos=null;
-		String errorBuffer="";
-		String boundary=myProps.getUplBoundary();
-		try {			
-			this.fileInputStream = new FileInputStream(fileName);
-			//Se abre una conexion HTTP a la URL
-			HttpURLConnection conn = (HttpURLConnection) this.getConnectURL();
-			dos = cargarConfiguracionDataOutputStream(conn,boundary);
-
-			// Envio valor md5 del archivo transmitido
-			
-			dos.writeBytes(lineEnd);
-			dos.writeBytes(twoHyphens + boundary + lineEnd);
-
-			//agrego el idDominio
-			agregarCampoAEnviar(dos,"idDominio",codigo,boundary);
-			//agrego el tipoDeArchivo
-			agregarCampoAEnviar(dos,"tipoDeArchivo",myProps.getReason(),boundary);
-			//agrego el codigo
-			agregarCampoAEnviar(dos,"codigo",codigo,boundary);
-			//agrego el userName
-			agregarCampoAEnviar(dos,"userName",myProps.getUserName(),boundary);
-			agregarCampoAEnviar(dos,"",myProps.getMapaDatosUsuarioFirma().get("MD5_ARCHIVO_FIRMADO"),boundary);
-			agregarArchivoAEnviarFile(dos,"md5_fileSigned", fileName, boundary);
-			
-			/*			
-			// Envio valor md5 del archivo transmitido
-			agregarCampoAEnviar(dos,"md5_file",myProps.getMapaDatosUsuarioFirma().get("MD5_ARCHIVO"),boundary);
-			// Envio valor md5 del archivo origen del proceso de firma
-			// Serial Number certificado utilizado para la firma
-			agregarCampoAEnviar(dos,"serialCert",myProps.getMapaDatosUsuarioFirma().get("SERIAL_CERTIFICADO"),boundary);
-			// Hash certificado utilizado para la firma
-			agregarCampoAEnviar(dos,"hashCert",myProps.getMapaDatosUsuarioFirma().get("HASH_CERTIFICADO"),boundary);
-			//agrego el CN
-			agregarCampoAEnviar(dos,"nombre",myProps.getMapaDatosUsuarioFirma().get("CN"),boundary);			
-			//agrego el MAil
-			String mail=myProps.getMapaDatosUsuarioFirma().containsKey("EMAILADDRESS")?myProps.getMapaDatosUsuarioFirma().get("EMAILADDRESS"):"no encontado";
-			agregarCampoAEnviar(dos,"mail",mail,boundary);			
-			//agrego el cargo
-			String cargo=myProps.getMapaDatosUsuarioFirma().containsKey("T")?myProps.getMapaDatosUsuarioFirma().get("T"):"no encontado";
-			agregarCampoAEnviar(dos,"cargo",cargo,boundary + twoHyphens);	
-			
-			String respuesta=recibirRespuesta(conn);
-			if (respuesta.equalsIgnoreCase("OK")) {
-				return true;
-			} else {		
-				errorBuffer+="Error de recepción en el server :" +respuesta;
-				this.setHttpFileError(errorBuffer);
-				return false;
-			}
-		}
-		catch (Exception e) {
-            cargarMensajeDeError("", e);
-            return false;
-                 }
-		finally{
-			if(fileInputStream!=null){
-				fileInputStream.close();
-			}
-			if(dos!=null){
-				dos.close();
-			}
-			
-		}
-		*/
 	}
 	
 	/**
@@ -320,9 +253,11 @@ public class HttpFileUploader extends HttpFileConnection {
 	 * @return
 	 * @throws IOException 
 	 */
-	public boolean doUploadApache(String fileName, PropsConfig myProps,String codigo) throws IOException {
+	public boolean doUploadApache(Documento documento, PropsConfig myProps,String codigo) throws IOException {
 		String errorBuffer="";
 		try {			
+			String fileName = documento.getArchivoFirmado().getPath();
+			
 			//SocketAddress addr = new InetSocketAddress("210.101.131.231", 8080);
 			//Proxy proxy = new Proxy(Proxy.Type.HTTP, addr);
 			
@@ -333,6 +268,7 @@ public class HttpFileUploader extends HttpFileConnection {
 		      
 			Part[] parts = {
 					new StringPart("codigo", codigo),
+					new StringPart("id", documento.getId()),
 					new FilePart("md5_fileSigned", new File(fileName))};
 			
 			String boundary = Part.getBoundary();

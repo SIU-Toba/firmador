@@ -8,6 +8,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -53,7 +54,7 @@ public final class PropsConfig {
     private String propsError;
 	
 	private HashMap<String, Documento> documentos;
-
+	boolean descargados = false;
 	
 	private PropsConfig() {
 		sourceDir = "";
@@ -136,6 +137,14 @@ public final class PropsConfig {
 		return multiple;
 	}
 			
+	public void setDocumentosDescargados(boolean descargados) {
+		descargados = true;
+	}
+	
+	public boolean getDocumentosDescargados() {
+		return descargados;
+	}
+	
 	
 	public List<String> getAutoCertificantes() {
 		return autoCertificantes;
@@ -165,7 +174,7 @@ public final class PropsConfig {
 
 	public void borrarDocumento(String id) {
 		if (existeDocumento(id)) {
-			if (documentos.get(id).getArchivoAFirmar().exists()) {
+			if (documentos.get(id).getArchivoAFirmar() != null && documentos.get(id).getArchivoAFirmar().exists()) {
 				try {
 					documentos.get(id).getArchivoAFirmar().delete();
 				} catch (SecurityException e) {
@@ -181,17 +190,17 @@ public final class PropsConfig {
 					e.printStackTrace();
 				}
 			}			
+			documentos.remove(id);
 		}
-		documentos.remove(id);
     }
 	
-	public void agregarDocumento(String id, File archivo) {
-		Documento documento = new Documento(archivo);
+	public void agregarDocumento(String id, String url) {
+		Documento documento = new Documento(id, url);
 		documentos.put(id, documento);
 	}
 	
-	public void agregarDocumentoUnico(File archivo) {
-		agregarDocumento(DOCUMENTO_UNICO_ID, archivo);
+	public void agregarDocumentoUnico(String url) {
+		agregarDocumento(DOCUMENTO_UNICO_ID, url);
 	}
 	
 	public Documento getDocumentoUnico() {
@@ -200,6 +209,21 @@ public final class PropsConfig {
 	
 	public HashMap<String, Documento> getDocumentos() {
 		return documentos;
+	}
+			
+	public int getCantidadDocumentos() {
+		return documentos.size();
+	}
+	
+	public void borrarDocumentos() {
+		ArrayList<String> keys = new ArrayList<String>();
+		for (Map.Entry<String, Documento> entry : getDocumentos().entrySet()) {
+			keys.add(entry.getKey());
+		}
+		for (int i = 0; i < keys.size(); i++) {
+			borrarDocumento(keys.get(i));
+		}
+
 	}
 			
 	//------------------------------

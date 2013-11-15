@@ -204,18 +204,23 @@ public class PdfControler {
 				return false;
 			}
 		} catch (KeyStoreException e) {
+			e.printStackTrace();
 			loguearExcepcion(e);
 			return false;
 		} catch (UnrecoverableKeyException e) {
+			e.printStackTrace();
 			loguearExcepcion(e);
 			return false;
 		} catch (NoSuchAlgorithmException e) {
+			e.printStackTrace();
 			loguearExcepcion(e);
 			return false;
 		} catch (URISyntaxException e) {
+			e.printStackTrace();
 			loguearExcepcion(e);
 			return false;
 		} catch (IOException e) {
+			e.printStackTrace();
 			loguearExcepcion(e);
 			return false;
 		}
@@ -288,7 +293,7 @@ public class PdfControler {
 				}
 			}
 		}catch (Exception e) {
-                        e.printStackTrace();
+            e.printStackTrace();
 			cargarMensajeDeError(PropsConfig.getInstance().getString("errorvalidarCRL"), "validarCRL", e);
 			loguearExcepcion(e);
 			return false;
@@ -367,6 +372,7 @@ public class PdfControler {
 			byte hash[] = prcMsgDig.digest();
 			mdNumber = HexUtils.byteArrayToHexString(hash);
 		} catch (NoSuchAlgorithmException e) {
+			e.printStackTrace();
 			loguearExcepcion(e);
 			cargarMensajeDeError( PropsConfig.getInstance().getString("errorHash"), "getMessageDig", e);
 		} 
@@ -419,6 +425,7 @@ public class PdfControler {
 				keyStoreData.setPkcs11Provider(sunpkcs.get(n));
 				break;
 			} catch (Exception e) {
+				e.printStackTrace();
 				cargarMensajeDeError("", "cargarKeyStorePKSC11", e);								
 			}
 		}
@@ -442,6 +449,7 @@ public class PdfControler {
 		try {
 			mzFirefox.loadMozillaLibraries();
 		} catch (Throwable e) {
+			e.printStackTrace();
 			System.out.println("[MozillaKeyStoreManager.initKeystores]::No se han podido cargar las librerías para Mozilla Firefox " + e.getMessage());
 			//throw new MozillaKeyStoreException("No se han podido cargar las librerías para Mozilla Firefox", e);
 		}
@@ -458,6 +466,7 @@ public class PdfControler {
 		try {
 			mzChromeLinux.loadChromeLibraries();
 		} catch (Throwable e) {
+			e.printStackTrace();
 			System.out.println("[ChromeLinuxKeyStoreManager.initKeystores]::No se han podido cargar las librerías para Chrome " + e.getMessage());
 			//throw new MozillaKeyStoreException("No se han podido cargar las librerías para Mozilla Firefox", e);
 		}
@@ -496,6 +505,7 @@ public class PdfControler {
 				}
 			} 
 			catch (Exception e) {
+				e.printStackTrace();
 				System.out.println("cargarConfiguracionProviderToken error: " + e.getMessage());
 				cargarMensajeDeError("", "cargarConfiguracionProviderToken", e);				
 			}
@@ -553,22 +563,27 @@ public class PdfControler {
 				}
 			}
 		} catch (KeyStoreException e) {
+			e.printStackTrace();
 			cargarMensajeDeError(PropsConfig.getInstance().getString(ERROR_ALMACEN),errOpera,e);
 			loguearExcepcion(e);
 			blnReturn = false;
 		} catch (NoSuchAlgorithmException e) {
+			e.printStackTrace();
 			cargarMensajeDeError(PropsConfig.getInstance().getString(ERROR_ALMACEN),errOpera,e);
 			loguearExcepcion(e);
 			blnReturn = false;
 		} catch (CertificateException e) {
+			e.printStackTrace();
 			cargarMensajeDeError(PropsConfig.getInstance().getString(ERROR_ALMACEN),errOpera,e);
 			loguearExcepcion(e);
 			blnReturn = false;
 		} catch (LoginException e) {
+			e.printStackTrace();
 			cargarMensajeDeError(PropsConfig.getInstance().getString(ERROR_ALMACEN),errOpera,e);
 			loguearExcepcion(e);
 			blnReturn = false;
 		} catch (IOException e) {
+			e.printStackTrace();
 			cargarMensajeDeError(PropsConfig.getInstance().getString(ERROR_ALMACEN),errOpera,e);
 			loguearExcepcion(e);
 			blnReturn = false;
@@ -628,6 +643,7 @@ public class PdfControler {
 		try {
 			stp = PdfStamper.createSignature(reader, fout, '\0',null, true);
 		} catch (com.itextpdf.text.DocumentException e) {
+			e.printStackTrace();
 			loguearExcepcion(e);
 		}
 		if(stp==null){
@@ -784,12 +800,14 @@ public class PdfControler {
 			PropsConfig.getInstance().setMapaDatosUsuarioFirma(currentKeyStoreData.getMapaSubjectDN());
 			descargarProvider();
 		}	catch (NoSuchAlgorithmException e) {
+			e.printStackTrace();
 			cargarMensajeDeError(PropsConfig.getInstance().getString("errorFirma"),errOpera,e);
 			loguearExcepcion(e);
 			if (!retValue ) {
 				FileSystem.getInstance().borrarArchivo(PropsConfig.getInstance().getSourceDir() + File.separator  + nombreArchivoFirmado);
 			}
 		} catch (DocumentException e) {
+			e.printStackTrace();
 			cargarMensajeDeError(PropsConfig.getInstance().getString("errorFirma"),errOpera,e);
 			loguearExcepcion(e);
 			if (!retValue ) {
@@ -797,10 +815,12 @@ public class PdfControler {
 			}
 		} 
 		catch (IOException e) {
+			e.printStackTrace();
 			cargarMensajeDeError(PropsConfig.getInstance().getString("errorFirma"),errOpera,e);
 			loguearExcepcion(e);
 		} 
 		catch (Exception e) {
+			e.printStackTrace();
 			cargarMensajeDeError(PropsConfig.getInstance().getString("errorFirma"),errOpera,e);
 			loguearExcepcion(e);
 		} 

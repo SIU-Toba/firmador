@@ -97,6 +97,7 @@ import ar.gob.onti.firmador.controler.StoreDctnry;
 				return cer.getOriginType();
 			}
 		} catch (SecurityException se) {
+			se.printStackTrace();
 		}
 		return null;
 	}

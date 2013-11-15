@@ -61,14 +61,9 @@ public class FirmaApplet extends JApplet{
 	
 	public boolean agregarDocumento(String id, String url) {
 		PropsConfig props = myMainWin.getSignProps();
-		File file = myMainWin.getfirmaControler().descargarDocumentoParaFirmar(this, url);
-		System.out.println("File: " + (file == null ? "NULL" : file.getAbsolutePath()));
-		if (file != null) {
-			props.agregarDocumento(id, file);
-			return true;
-		} else {
-			return false;
-		}
+		props.agregarDocumento(id, url);
+		myMainWin.setEstado(VentanaPrincipal.Estados.DOCUMENTO_AGREGADO);
+		return true;
     }
 	
 	public boolean quitarDocumento(String id) {
@@ -76,8 +71,10 @@ public class FirmaApplet extends JApplet{
 		if (props.existeDocumento(id)) {
 			props.borrarDocumento(id);
 		}
+		myMainWin.setEstado(VentanaPrincipal.Estados.DOCUMENTO_QUITADO);		
 		return true;
     }
+	
 	/**
 	 * Metodo principal del Applet a partir del cual el este se 
 	 * inicializa y  se ejecutara
@@ -123,10 +120,17 @@ public class FirmaApplet extends JApplet{
 		myMainWin.initSigner(this);
 		
 		if (! config.isMultiple())  {
+			config.agregarDocumentoUnico(downloadURL);
+			myMainWin.showProgress(PropsConfig.getInstance().getString("progresoBajandoArchivo"));			
 			File file = myMainWin.getfirmaControler().descargarDocumentoParaFirmar(this, downloadURL);
 			if (file != null) {
-				config.agregarDocumentoUnico(file);
-			}		
+				myMainWin.setEstado(VentanaPrincipal.Estados.DESCARGA_OK);
+				config.getDocumentoUnico().setArchivoAFirmar(file);
+			} else {
+				myMainWin.setEstado(VentanaPrincipal.Estados.DESCARGA_ERROR);
+			}
+		} else {
+			config.borrarDocumentos();
 		}
 		
 		try {
