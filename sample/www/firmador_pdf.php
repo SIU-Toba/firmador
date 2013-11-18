@@ -103,6 +103,8 @@ class firmador_pdf
          <param name="CODIGO"  value="<?php echo $sesion; ?>" />
          <param name="PREGUNTAS" value='{ "preguntasRespuestas": []}' />
 		 <param name='codebase_lookup' value='false' />
+	     <param name="classloader_cache" value="false" />
+		 
 		<?php if ($this->sesion_handler == 'php') { ?>	
 			<param  name="COOKIE" value="<?php echo session_name()."=".session_id(); ?>" />
 		<?php } ?>

@@ -25,7 +25,7 @@ if (! isset($_GET['accion'])) {
 		<h2>Ejemplo de Firma Múltiple</h2>
 		<div style="font-size: 10px; margin: 10px;">Este ejemplo permite seleccionar una serie de documentos pdfs pertenecientes a la carpeta <em>"multiples"</em>. A medida que se clickean los checkboxes se comunica
 			via javascript con el applet, enviandoles el ID y URL de cada documento. Al presionar <em>"Firmar Documentos"</em> el Applet descarga los documentos hacia el client-side (una carpeta temporal), accede al token-usb (ingresando el PIN una única vez)
-			y firmar uno a uno los documentos seleccionados. Al finalizar hace un POST por cada documento hacia este mismo .php que almacena los documentos en <em>"multiples_firmados"</em>.
+			y firma uno a uno los documentos seleccionados. Al finalizar hace un POST por cada documento hacia este mismo .php que almacena los documentos en <em>"multiples_firmados"</em>.
 			<br/><br/>
 			Para que este ejemplo funcione tiene que dar permisos de escritura al usuario apache (generalmente www-data) sobre la carpeta <em>"multiples_firmados"</em>
 		</div>
@@ -94,7 +94,7 @@ if (! isset($_GET['accion'])) {
 	?>
 	</div>
 	<div id="pdf" style="display: none; float: right; border: 1px solid black; height:800px; width:600px; text-align: center">
-		<div style="margin-top: 40px">Haga click en los documentos para visualizarlos.</div>
+		<div style="margin-top: 40px; color: gray">Haga click en los documentos para visualizarlos.</div>
 	</div>
 	</div>
 	</body>

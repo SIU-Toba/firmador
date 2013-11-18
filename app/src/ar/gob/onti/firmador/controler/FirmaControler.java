@@ -129,6 +129,7 @@ public class FirmaControler {
 	 * @param container recibe como parametro el contenedor de los componentes el Applet
 	 */
 	public boolean firmarDocumento(Container container, Documento documento) {
+		System.out.println("Firmando documento id: " + documento.getId() + " path: " + documento.getArchivoAFirmar().getAbsolutePath());
 		if (!FileSystem.getInstance().isExisteArchivo(documento.getArchivoAFirmar())) {
 			System.err.println("No existe el archivo " + documento.getArchivoAFirmar().getAbsolutePath());
 			mostrarMensajesError(container, myProps.getString("errorArchivoParaFirmarInexistente"), null);

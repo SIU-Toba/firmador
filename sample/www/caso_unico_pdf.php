@@ -19,6 +19,27 @@ $firmador->set_guardar_sesion_en_php();
 //-- CASO BASE: Generar applet
 //---------------------------------
 if (! isset($_GET['accion'])) {
+	
+	?>
+	<html>
+		<head>
+			<style type="text/css">
+				* {    
+					font-family: Verdana, Arial, 'sans-serif' !important; 
+					font-size: 12px;
+				}
+			</style>
+		</head>
+	<body>
+		<h2>Ejemplo de Firma de un único documento</h2>
+		<div style="font-size: 10px; margin: 10px;">En este ejemplo el Applet descarga un documento PDF (<em>"docOriginal1.pdf"</em>) desde el servidor. Al presionar <em>"Firmar Documento"</em> , se accede al token-usb (ingresando el PIN una única vez)
+		, firma el documento y luego hace un POST con el documento firmado hacia este mismo .php, que lo almacena como <em>"docFirmado1.pdf"</em>.
+			<br/><br/>
+			Para que este ejemplo funcione tiene que dar permisos de escritura al usuario apache (generalmente www-data) sobre la carpeta <em>"sample"</em>
+		</div>
+		<hr/>
+	<div style="width:850px;margin:0 auto;">	
+	<?php
 	$firmador->set_dimension(500, 120);
 	$firmador->set_motivo("Motivo de la firma");
 	$url_actual = $firmador->get_url_base_actual(). $_SERVER['REQUEST_URI'];
@@ -27,6 +48,11 @@ if (! isset($_GET['accion'])) {
 								$url_actual."?accion=recibir"
 							);
 	$firmador->generar_visor_pdf("pdfobject.min.js", $url_actual."?accion=enviar");
+	?>
+	</div>
+	</body>
+	</html>
+	<?php
 	die;
 }
 
