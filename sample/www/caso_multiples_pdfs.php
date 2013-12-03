@@ -153,7 +153,6 @@ if ($_GET['accion'] == 'recibir') {
 	$path = $_FILES['md5_fileSigned']['tmp_name'];
 	$id = (int) $_POST['id'];
 	$destino = dirname(dirname(__FILE__)).'/multiples_firmados/doc_'.$id.'.pdf';
-	file_put_contents("/tmp/firmador", $destino."\n", FILE_APPEND);
 	if (! move_uploaded_file($path, $destino)) {
 		error_log("Error uploading file");
 		header('HTTP/1.1 500 Internal Server Error');

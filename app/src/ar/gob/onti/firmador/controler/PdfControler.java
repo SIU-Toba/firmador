@@ -130,11 +130,11 @@ public class PdfControler {
 	 * @throws Exception
 	 */
 	public PdfControler() throws NoSuchAlgorithmException {
-
-			myRandomGen = SecureRandom.getInstance("SHA1PRNG");
-			keyStoreDataCollection = new KeyStoreData[2];
-			keyStoreDataCollection[0] = new KeyStoreData();
-			keyStoreDataCollection[1] = new KeyStoreData();
+		myRandomGen = SecureRandom.getInstance("SHA1PRNG");
+		keyStoreDataCollection = new KeyStoreData[OriginType.values().length];
+		for (int i = 0; i < keyStoreDataCollection.length; i++) {
+			keyStoreDataCollection[i] = new KeyStoreData();
+		}
 		pdfLogFile = null;
 	}
 	/**
@@ -166,7 +166,7 @@ public class PdfControler {
 	 * @param propsConfig 
 	 * @return
 	 */
-	public boolean cargarClavePrivadaYCadenaDeCertificados(String idCert, String passToken, boolean validateOCSP) throws KeyStoreException {
+	public boolean cargarClavePrivadaYCadenaDeCertificados(String idCert, boolean validateOCSP) throws KeyStoreException {
 		String alias = "";
 		String originType = "";
 		boolean result=true;
@@ -189,11 +189,7 @@ public class PdfControler {
 				cerONTI = (X509Certificate)cerKeyStore;
 			}
 			validarVigenciaCertificado(cerONTI);
-			if (passToken != null && OriginType.values()[Integer.parseInt(originType)] == OriginType.token) {
-				currentKeyStoreData.setKeySign((PrivateKey) currentKeyStoreData.getKeyStore().getKey(alias, passToken.toCharArray()));
-			} else {
-				currentKeyStoreData.setKeySign((PrivateKey) currentKeyStoreData.getKeyStore().getKey(alias, null));				
-			}
+			currentKeyStoreData.setKeySign((PrivateKey) currentKeyStoreData.getKeyStore().getKey(alias, null), alias);				
 			currentKeyStoreData.setChain(currentKeyStoreData.getKeyStore().getCertificateChain(alias));
 			
 			signError="";
@@ -387,14 +383,15 @@ public class PdfControler {
 	public void cargarKeyStoreWindows() throws KeyStoreException, NoSuchAlgorithmException, CertificateException, IOException{
 		// MS-Internet Explorer
 		KeyStore keyStore = KeyStore.getInstance("Windows-MY");
-		this.keyStoreDataCollection[0].setKeyStore(keyStore);
+		this.keyStoreDataCollection[OriginType.browser.ordinal()].setKeyStore(keyStore);
 		//this.keyStore = KeyStore.getInstance("Windows-ROOT");
 		keyStore.load(null, null);
 	}
-	public void cargarKeyStorePKSC11(String[] cfgProvider, OriginType originType, String passToken) throws IOException, LoginException, KeyStoreException, NoSuchAlgorithmException, CertificateException {
+	
+	public void cargarKeyStorePKSC11(String[] cfgProvider, OriginType originType) throws IOException, LoginException, KeyStoreException, NoSuchAlgorithmException, CertificateException {
 		KeyStoreData keyStoreData;
 		keyStoreData = this.keyStoreDataCollection[originType.ordinal()];
-		
+
 		Secmod secmod = Secmod.getInstance();
 		ArrayList<SunPKCS11> sunpkcs = new ArrayList<SunPKCS11>(); 
 		if(!secmod.isInitialized()){
@@ -416,11 +413,7 @@ public class PdfControler {
 			try {
 				sunpkcs.get(n).login(new Subject(), new DialogCallbackHandler());
 				currentKeyStore = KeyStore.getInstance("PKCS11",sunpkcs.get(n));
-				if (passToken != null) {
-					currentKeyStore.load(null, passToken.toCharArray());
-				} else {			
-					currentKeyStore.load(null, null);
-				}
+				currentKeyStore.load(null, null);
 				keyStoreData.setKeyStore(currentKeyStore);
 				keyStoreData.setPkcs11Provider(sunpkcs.get(n));
 				break;
@@ -475,10 +468,12 @@ public class PdfControler {
 		providers[0] = mzChromeLinux.getPKCS11CfgInputStream();
 		return providers;
 	}
+	
 	private void cargarConfiguracionProviderLinuxMac() {
 		AppleSafari appleSafari = new AppleSafari();
-		this.keyStoreDataCollection[0].setKeyStore(appleSafari.initialize());
+		this.keyStoreDataCollection[OriginType.browser.ordinal()].setKeyStore(appleSafari.initialize());
 	}
+	
 	public String[] cargarConfiguracionProviderToken(){
 		ProvidersConfig providerBundle = new ProvidersConfig();
 
@@ -522,73 +517,80 @@ public class PdfControler {
 	 * @param passToken
 	 * @return
 	 */
-	public boolean cargarKeyStore(String passToken) {
+	public boolean cargarKeyStore() {
+		
 		String[] cfgProvider = null;
-		boolean blnReturn = true;
 		signError = PropsConfig.getInstance().getString("errorKeyStore");
 		String errOpera = "";
+		
+		//1- Intenta cargar keystore de windows
+		String os = System.getProperty("os.name").toLowerCase();
+		if (os.contains("win")) {		
+			try {
+				if(!this.keyStoreDataCollection[OriginType.browser.ordinal()].isKeyStoreOpen()){			
+						errOpera = "cargarKeyStoreWindows";
+						cargarKeyStoreWindows();
+						System.out.println("Keystore cargado: Windows");		
+				}
+				return true;
+			} catch (Exception e) {
+				e.printStackTrace();
+				cargarMensajeDeError(PropsConfig.getInstance().getString(ERROR_ALMACEN),errOpera,e);
+				loguearExcepcion(e);
+			}
+		}
+		
+		//2- Si falla, o no es windows, intenta cargar el keystore desde el token usando pkcs11 
 		try {
-			if(!this.keyStoreDataCollection[1].isKeyStoreOpen()){
+			if(!this.keyStoreDataCollection[OriginType.token.ordinal()].isKeyStoreOpen()){
 				errOpera = "cargarConfiguracionProviderToken";
-				cfgProvider =cargarConfiguracionProviderToken();
+				cfgProvider = cargarConfiguracionProviderToken();
 				errOpera = "cargarKeyStorePKSC11";
-				cargarKeyStorePKSC11(cfgProvider, OriginType.token, passToken);
-				blnReturn = true;
-			}	
-
-			if(!this.keyStoreDataCollection[0].isKeyStoreOpen()){
-				if (this.signProps.getBrowser().equalsIgnoreCase("IEXPLORER")) {
-					errOpera = "cargarKeyStoreWindows";
-					cargarKeyStoreWindows();
-					blnReturn = true;
-				} 
+				cargarKeyStorePKSC11(cfgProvider, OriginType.token);
+				System.out.println("Keystore cargado: pkcs11");				
+			}
+			return true;
+		} catch (Exception e) {
+			e.printStackTrace();
+			cargarMensajeDeError(PropsConfig.getInstance().getString(ERROR_ALMACEN),errOpera,e);
+			loguearExcepcion(e);
+		}
+		
+		//3-- Si falla, Intenta Carga el keystore del navegador (beta)
+		try {
+			//-- Carga el keystore del browser
+			if(!this.keyStoreDataCollection[OriginType.browser.ordinal()].isKeyStoreOpen()){
+				System.out.println("Navegador: " + this.signProps.getBrowser());			
+				/*if (this.signProps.getBrowser().equalsIgnoreCase("IEXPLORER")) {
+							
+				} */
 				if (this.signProps.getBrowser().equalsIgnoreCase("FIREFOX")) {
 					errOpera = "cargarConfiguracionProviderFirefox";
 					cfgProvider =cargarConfiguracionProviderFirefox();
 					errOpera = "cargarKeyStorePKSC11";
-					cargarKeyStorePKSC11(cfgProvider, OriginType.browser, null);
-					blnReturn = true;
+					cargarKeyStorePKSC11(cfgProvider, OriginType.browser);
+					System.out.println("Keystore cargado: Firefox");									
 				}
 				if (this.signProps.getBrowser().equalsIgnoreCase("CHROME_LINUX")) {
 					errOpera = "cargarConfiguracionProviderChromeLinux";
 					cfgProvider =cargarConfiguracionProviderChromeLinux();
 					errOpera = "cargarKeyStorePKSC11";
-					cargarKeyStorePKSC11(cfgProvider, OriginType.browser, null);
-					blnReturn = true;
+					cargarKeyStorePKSC11(cfgProvider, OriginType.browser);
+					System.out.println("Keystore cargado: Chrome linux");									
 				}
 				if (this.signProps.getBrowser().equalsIgnoreCase("LINUX_MAC")) {
 					errOpera = "cargarConfiguracionProviderLinuxMac";
 					cargarConfiguracionProviderLinuxMac();
-					blnReturn = true;
+					System.out.println("Keystore cargado: linux mac");									
 				}
 			}
-		} catch (KeyStoreException e) {
+			return true;
+		} catch (Exception e) {
 			e.printStackTrace();
 			cargarMensajeDeError(PropsConfig.getInstance().getString(ERROR_ALMACEN),errOpera,e);
 			loguearExcepcion(e);
-			blnReturn = false;
-		} catch (NoSuchAlgorithmException e) {
-			e.printStackTrace();
-			cargarMensajeDeError(PropsConfig.getInstance().getString(ERROR_ALMACEN),errOpera,e);
-			loguearExcepcion(e);
-			blnReturn = false;
-		} catch (CertificateException e) {
-			e.printStackTrace();
-			cargarMensajeDeError(PropsConfig.getInstance().getString(ERROR_ALMACEN),errOpera,e);
-			loguearExcepcion(e);
-			blnReturn = false;
-		} catch (LoginException e) {
-			e.printStackTrace();
-			cargarMensajeDeError(PropsConfig.getInstance().getString(ERROR_ALMACEN),errOpera,e);
-			loguearExcepcion(e);
-			blnReturn = false;
-		} catch (IOException e) {
-			e.printStackTrace();
-			cargarMensajeDeError(PropsConfig.getInstance().getString(ERROR_ALMACEN),errOpera,e);
-			loguearExcepcion(e);
-			blnReturn = false;
 		}
-		return blnReturn;
+		return false;
 	}
 
 	/**
@@ -848,6 +850,8 @@ public class PdfControler {
 		for(int n = 0; n < this.keyStoreDataCollection.length; n++) {
 			if (this.keyStoreDataCollection[n].getKeyStore() != null) {
 				list.add(this.keyStoreDataCollection[n].getKeyStore());
+			} else {
+				list.add(null);
 			}
 		}
 		return list.toArray(new KeyStore[list.size()]);

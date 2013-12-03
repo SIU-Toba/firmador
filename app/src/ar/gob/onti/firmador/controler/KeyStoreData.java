@@ -30,12 +30,15 @@ import ar.gob.onti.firmador.util.HexUtils;
 
 import com.itextpdf.text.pdf.PdfPKCS7;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLDecoder;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
+import java.security.KeyStoreException;
 import java.security.NoSuchProviderException;
 import java.security.PublicKey;
 import java.security.SignatureException;
@@ -79,8 +82,34 @@ public class KeyStoreData {
 		return this.keySign;
 	}
 
-	public void setKeySign(PrivateKey keySign) {
+	public void setKeySign(PrivateKey keySign, String alias) {
 		this.keySign = keySign;
+		
+		/*		//Agregar certificados raiz aceptados por el applet
+        ArrayList<Certificate> trustedChain = new ArrayList<Certificate>();
+		List<String> trusted = PropsConfig.getInstance().getTrustedCertificates();
+		ClassLoader cl = this.getClass().getClassLoader();
+		try {
+			 CertificateFactory cf = CertificateFactory.getInstance("X.509");
+			 InputStream res;
+			 for (int i = 0; i < trusted.size(); i++) {
+				 res = cl.getResourceAsStream("trusted-certificates/" + trusted.get(i) + ".crt");
+				 if (res == null) {
+					signError += "\r\nTrusted certificate no encontrado: " + trusted.get(i);
+					return;
+				 }
+				 X509Certificate cert = (X509Certificate) cf.generateCertificate(res);
+				 trustedChain.add(cert);
+				 System.out.println("Agregando certificado a trusted... " + cert.toString());
+			 }
+	         Certificate[] trustedChainArray = trustedChain.toArray(new Certificate[0]);
+			 this.keyStore.setKeyEntry(alias, keySign, null, trustedChainArray);
+		 } catch (CertificateException ex) {
+			 ex.printStackTrace();
+		 }  catch (KeyStoreException ex) {
+			 ex.printStackTrace();
+		 } */
+		
 	}
 
 	public Certificate[] getChain() {
@@ -89,7 +118,17 @@ public class KeyStoreData {
 
 	public void setChain(Certificate[] chain) {
 		this.chain = chain.clone();
+		
+		//todo: Agregar certificados faltantes (por si usa PKCS11)
+		
+		
+		
+		//http://itext-general.2136553.n4.nabble.com/Re-Where-to-get-Certificates-for-PDF-Signing-PKCS11-works-td2152929.html#none
+		//http://lists.iaik.tugraz.at/pipermail/jce-general/2003-December/003580.html
+		//http://stackoverflow.com/questions/5476974/java-access-to-intermediate-cas-from-windows-keystores
+		//http://bfo.com/blog/2011/04/01/perfect_pdf_digital_signatures.html
 	}
+
 
 	/**
 	 * devuelve el KeyStore del navegador donde se ejecuta el Applet
@@ -105,8 +144,10 @@ public class KeyStoreData {
 	 */
 	public void setKeyStore(KeyStore keyStore) {
 		this.keyStore = keyStore;
-	}
+		
 
+	}
+	
 	/**
 	 * metodo que devulve true o false si existe la cadena  de certificados
 	 * @return
@@ -264,6 +305,9 @@ public class KeyStoreData {
                     X509Certificate cert = (X509Certificate) cf.generateCertificate(res);
                     trustedCerts.add(cert);
                 }
+				if (chain.length == 0) {
+					return false;	//Sin cadena, no hay forma de validarlo
+				}
    
                 for (int i = 0; i < chain.length; i++) {
                     X509Certificate cert = (X509Certificate) chain[i];

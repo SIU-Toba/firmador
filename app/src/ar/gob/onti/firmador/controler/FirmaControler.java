@@ -33,9 +33,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 
-
-
-
 /**
  * Controlador que se encarga de manejar las acciones que realiza el usuario
  * @author ocaceres
@@ -148,7 +145,7 @@ public class FirmaControler {
 
 		} catch (Exception e) {
 			e.printStackTrace();
-			mostrarMensajesError(container, myProps.getString("errorEliminandoSinFirmar"), e);
+			mostrarMensajesError(container, myProps.getString("errorFirmaGenerico"), e);
 			return false;
 		}
 	}
@@ -209,24 +206,10 @@ public class FirmaControler {
 		}
 		
     	if (!mainWindow.getPdfControler().existeCertificate()) {
-			StringBuffer tokenPin = new StringBuffer();
-//			 Se pide el ingreso del PIN en caso de token
-/*
-			if (mainWindow.getPdfControler().isKeyStoreTokenOpen()) {
-				tokenPin=preguntarPinToken(container);
-			}
- */
-			if (!mainWindow.getPdfControler().cargarKeyStore(tokenPin.toString()) ) {
-				mostrarMensajesError(container, mainWindow.getPdfControler().getSignError(), null);
-
+			if(!mostrarCertificados()) {
 				return false;
-			} else{
-				if(!mostrarCertificados(tokenPin.toString())){
-					return false;
-				}
 			}
-
-		}	
+		}
     	return true;
     }
 	/**
@@ -304,17 +287,20 @@ public class FirmaControler {
 	 * para firmar los documentos
 	 * @return
 	 */
-	public boolean mostrarCertificados (String tokenPin) {
+	public boolean mostrarCertificados () {
 		mainWindow.getCertSelecionado().setText("");
-		if (!mainWindow.getPdfControler().cargarKeyStore(tokenPin)) {
+		if (!mainWindow.getPdfControler().cargarKeyStore()) {
 				mostrarMensajesError(mainWindow.getContainer(), mainWindow.getPdfControler().getSignError(), null);
+				return false;
 		}
 		try {
 			CertsTreeTable aCertsDlg = new CertsTreeTable();
 			aCertsDlg.inicializar(findParentFrame(), mainWindow.getPdfControler().getKeyStores(), mainWindow.getSignProps().getAutoCertificantes());
 			if (aCertsDlg.getSelectedCert().length() > 0){
 				mainWindow.getCertSelecionado().setText(aCertsDlg.getSelectedCert());
-				if(!mainWindow.getPdfControler().cargarClavePrivadaYCadenaDeCertificados( mainWindow.getCertSelecionado().getText().trim(), tokenPin, true)){
+				boolean validarOSCP = mainWindow.getSignProps().getValidarOSCP();
+				System.out.println("Validando OSCP: " + (validarOSCP ? "true" : "false"));
+				if(!mainWindow.getPdfControler().cargarClavePrivadaYCadenaDeCertificados( mainWindow.getCertSelecionado().getText().trim(), validarOSCP)){
 					mostrarMensajesError(mainWindow.getContainer(),mainWindow.getPdfControler().getSignError() , null);
 					return false;
 				}
@@ -393,6 +379,10 @@ public class FirmaControler {
     * @param container recibe como parametro el contenedor de los componentes el Applet
     */
 	public File descargarDocumentoParaFirmar (Container container, String documentoUrl) {
+		if (documentoUrl == null) {
+			mostrarMensajesError(container, myProps.getString("errorDescargarDoc")+ ". Url vacia", null);
+			return null;
+		}
 		HttpFileDownLoader fileDown = new HttpFileDownLoader();
 		String url = agregarParametroUrl(container, documentoUrl, fileDown);
         System.out.println("Downloading from " + url);

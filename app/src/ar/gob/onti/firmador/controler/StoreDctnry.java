@@ -131,6 +131,9 @@ public class StoreDctnry {
 		int index;
 		ArrayList<BigInteger> serials = new ArrayList<BigInteger>();
 		for(int n = 0; n < keyStrToken.length; n++) {
+			if ( keyStrToken[n] == null) {
+				continue;	//Keystore invalido, no problem
+			}
 			Enumeration<String> aliasEnm = keyStrToken[n].aliases();
 			for (; aliasEnm.hasMoreElements();) {
 				aliasCer =  aliasEnm.nextElement();
@@ -168,6 +171,8 @@ public class StoreDctnry {
 				Date now = new Date();
 				if ((now.getTime() >= lowDate.getTime()) && (now.getTime() <= upDate.getTime())) {
 					// Si todo OK, entonces se agrega al diccionario
+					/*System.out.println("issuerCN " + issuerCN + " subjCN " + subjCN + " nroSerie " + nroSerie + " datCaducidad " + datCaducidad + " aliasCer " + aliasCer
+								 + " origin " + OriginType.values()[n].toString());*/
 					addAlias(issuerCN, subjCN, nroSerie, datCaducidad, aliasCer, OriginType.values()[n]);
 				}  
 			}

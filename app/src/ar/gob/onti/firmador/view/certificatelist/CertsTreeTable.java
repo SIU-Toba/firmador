@@ -311,6 +311,7 @@ public class CertsTreeTable {
 				JOptionPane.showMessageDialog(null,myProps.getString("errorCertPersonal1").replace("CERTIFICADO", selectedCert) ,myProps.getString("certificados") , JOptionPane.ERROR_MESSAGE);
 			} else {
 				aliasSelCert = selectedCert + "##" + selSerial  + "##" + selAlias + "##" + selOriginType;
+				//System.out.println("Selected Alias: " + aliasSelCert);
 				mainDlg.dispatchEvent(new WindowEvent(mainDlg, WindowEvent.WINDOW_CLOSING));
 			}
 
@@ -323,7 +324,6 @@ public class CertsTreeTable {
 	}
 
 	public String getSelectedCert() {
-
 		String aliasCert = "";
 		if (aliasSelCert.trim().length() > 0) {
 			aliasSelCert = aliasSelCert.trim();
@@ -339,10 +339,11 @@ public class CertsTreeTable {
 		String serialN = (treeTable.getValueAt(certificadoSelecionado, 1)).toString().trim();
 		String selAlias = certsModel.getCerAlias(serialN, null);
 		String originType = certsModel.getOriginType(serialN, null);
-		int origin = 0;
-		if (originType != null && originType != "") {
-			origin = Integer.parseInt(originType);
+		//System.out.println("certificadoSelecionado: " + certificadoSelecionado + " serialN: " + serialN + " selAlias: " + selAlias + " origintype: " + (originType == null ? "NULL" : originType));
+		if (originType == null || originType == "") {
+			return;	//Not a leaf
 		}
+		int origin = Integer.parseInt(originType);
 		X509Certificate cerONTI = null;
 		Certificate cerKeyStore = null;
 		try {
@@ -359,6 +360,7 @@ public class CertsTreeTable {
 			PropsConfig.getInstance().getAppLogFile().info(e.getMessage());				
 		}
 	}
+	
 	class IndicatorRenderer extends DefaultTableCellRenderer {
 		/**
 		 * 

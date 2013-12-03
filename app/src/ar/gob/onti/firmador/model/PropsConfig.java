@@ -44,7 +44,8 @@ public final class PropsConfig {
 	private boolean multiple = false;
 	//Autoridades certificantes
 	private List<String> autoCertificantes;
-        private List<String> trustedCertificates;
+    private List<String> trustedCertificates;
+	private boolean validarOSCP;
 
 	private Map<String, String> mapaDatosUsuarioFirma;
 	// Conexion servidor
@@ -63,6 +64,7 @@ public final class PropsConfig {
 		uploadURL = "";
 		uplBoundary = "";
 		propsError = "";
+		validarOSCP = true;
 		autoCertificantes= new ArrayList<String>();
                 trustedCertificates = new ArrayList<String>();
 		this.myProps = ResourceBundle.getBundle("properties.firma",new Locale("es","AR"));
@@ -228,6 +230,10 @@ public final class PropsConfig {
 			
 	//------------------------------
 
+	public boolean getValidarOSCP() {
+		return validarOSCP;
+	}
+	
 	public String getReason() {
 		return reason;
 	}
@@ -299,6 +305,10 @@ public final class PropsConfig {
 	 *  Si no se especifico ninguno se aceptan todas
 	 */
 	public void cargarTrustedCertificates(){
+		if (myProps.containsKey("validarOSCP")) {
+			validarOSCP = myProps.getString("validarOSCP").trim().equalsIgnoreCase("1");
+		}
+				
 		String readProperty="";
 		String certificate="";
 		int itera = 1;
