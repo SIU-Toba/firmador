@@ -150,6 +150,12 @@ public class VentanaPrincipal implements Runnable  {
 	 */
 	public VentanaPrincipal(Container container,String browser) {
 		super();
+		String os = System.getProperty("os.name").toLowerCase();
+		if (os.contains("win")) {
+			letra = "Arial";
+		} else {
+			letra = "Droid Sans";
+		}
 		myProps =PropsConfig.getInstance();
 		myProps.setBrowser(browser);
 		appLogFile = null;
@@ -186,7 +192,7 @@ public class VentanaPrincipal implements Runnable  {
 		// Seleccion de archivo
 		if(jLblPDFile==null){
 			jLblPDFile = new JLabel(myProps.getString("titulo"));
-			jLblPDFile.setFont(new java.awt.Font(letra, Font.PLAIN, 12));
+			jLblPDFile.setFont(new java.awt.Font(letra, Font.PLAIN, 11));
 		}
 		return jLblPDFile;
 	}
@@ -274,7 +280,7 @@ public class VentanaPrincipal implements Runnable  {
 			// Operaciones
 			botonVerPdf = new javax.swing.JButton();
 			botonVerPdf.setText(myProps.getString("visualizar"));
-			botonVerPdf.setFont(new java.awt.Font(letra, Font.PLAIN, 12));
+			botonVerPdf.setFont(new java.awt.Font(letra, Font.PLAIN, 11));
 			botonVerPdf.setToolTipText("Visualizar el PDF en un programa externo, por ejemplo Adobe Reader");
 			botonVerPdf.setVisible(false);			
 			botonVerPdf.addActionListener(new java.awt.event.ActionListener() {
@@ -295,7 +301,7 @@ public class VentanaPrincipal implements Runnable  {
 		if(botonFirmar==null){
 			botonFirmar = new javax.swing.JButton();
 			botonFirmar.setText(myProps.getString("firmar"));
-			botonFirmar.setFont(new java.awt.Font(letra, Font.BOLD, 12));
+			botonFirmar.setFont(new java.awt.Font(letra, Font.BOLD, 11));
 			botonFirmar.setEnabled(false);
 			AccessController.doPrivileged(new PrivilegedAction<Object>() {
 				public Object run()
