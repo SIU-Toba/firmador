@@ -53,6 +53,7 @@ public final class PropsConfig {
 	private String uplBoundary = "";
 	// Mensaje error
     private String propsError;
+    private boolean stampWatermark;
 	
 	private HashMap<String, Documento> documentos;
 	boolean descargados = false;
@@ -137,6 +138,14 @@ public final class PropsConfig {
 	
 	public boolean isMultiple() {
 		return multiple;
+	}
+	
+	public boolean getStampWatermark() {
+		return stampWatermark;
+	}
+	
+	public void setStampWatermark(boolean stamp) {
+		stampWatermark = stamp;
 	}
 			
 	public void setDocumentosDescargados(boolean descargados) {
@@ -350,7 +359,7 @@ public final class PropsConfig {
 			uplBoundary = myProps.getString("UploadBoundary").trim();
 			this.mapaDatosUsuarioFirma= new HashMap<String, String>();
 		} catch (IOException e) {
-			propsError = "Método PropsConfig.ReadProps(): Error de lectura en archivo propiedades";
+			propsError = "Mï¿½todo PropsConfig.ReadProps(): Error de lectura en archivo propiedades";
 			if (e.getMessage() != null) {
 				propsError += "\nMensaje JVM: " + e.getMessage();
 			}

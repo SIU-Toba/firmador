@@ -24,21 +24,21 @@ import java.util.Map;
 
 
 /**
- *   El Applet de firma digital de la Subsecretaria de Tecnologías de Gestión está 
+ *   El Applet de firma digital de la Subsecretaria de Tecnologï¿½as de Gestiï¿½n estï¿½ 
  *   desarrollado en Java y se ejecuta desde un navegador web para realizar la firma 
  *   digital de una archivo pdf, siendo este Applet capaz de emplear directamente 
- *   los certificados accesibles desde el almacén de claves de Windows o vía PKCS11, 
- *   accediendo directamente al repositorio de Mozilla Firefox, ofreciendo una gestión 
+ *   los certificados accesibles desde el almacï¿½n de claves de Windows o vï¿½a PKCS11, 
+ *   accediendo directamente al repositorio de Mozilla Firefox, ofreciendo una gestiï¿½n 
  *   transparente para el usuario.
  *  
  *  Clase principal donde se llama al metodo init()
  *  en donde se ejecuta el Applet
  *  
  *   Ejemplo de configuracion del Apllet de firma digital
- *   Configuración del Applet en la página web donde se  ejecutara.
+ *   Configuraciï¿½n del Applet en la pï¿½gina web donde se  ejecutara.
  *< applet  code="ar.gov.firmador.FirmaApplet.class" codebase="resource/applet/"	 
  *   archive="FirmaApplet-1.0-jar-with-dependencies.jar"  width="700"	height="410" >
- * < param  name="URL_DESCARGA"	 value=”http://ip:puerto /rutaApplicacion/downloadServlet” >
+ * < param  name="URL_DESCARGA"	 value=ï¿½http://ip:puerto /rutaApplicacion/downloadServletï¿½ >
  * < param  name="URL_SUBIR"	value=" http://ip:puerto /rutaApplicacion/post_subir_archivo">
  * < param  name="MOTIVO"  value="Firmar Dictamen">
  * < param  name="CODIGO"  value="23|233|PLIEGO|19" />
@@ -96,7 +96,7 @@ public class FirmaApplet extends JApplet{
 		String userName = this.getParameter("USERNAME");
 		String cookie = this.getParameter("COOKIE");
 		String multiple = this.getParameter("MULTIPLE");
-
+		String stampWatermark = this.getParameter("STAMP_WATERMARK");
 		
 		PreguntasRespuestas preguntas = new PreguntasRespuestas();
 		preguntas.parse(URLDecoder.decode(this.getParameter("PREGUNTAS")));
@@ -114,6 +114,7 @@ public class FirmaApplet extends JApplet{
 		config.setUserName(userName);
 		config.setPreguntas(preguntas);
 		config.setMultiple(multiple != null && multiple.equalsIgnoreCase("true"));
+		config.setStampWatermark(stampWatermark == null || stampWatermark.equalsIgnoreCase("true"));
 		config.setVisible(true);
 		myMainWin.initProps(this);
 		myMainWin.initLogFile(this);

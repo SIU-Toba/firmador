@@ -87,7 +87,7 @@ class firmador_pdf
    }
    
     
-   function generar_applet($url_jar, $url_descarga, $url_subir)
+   function generar_applet($url_jar, $url_descarga, $url_subir, $watermark = true)
    {
         $sesion = $this->generar_sesion();
 		?>
@@ -101,6 +101,7 @@ class firmador_pdf
          <param name="URL_SUBIR"	value="<?php echo $url_subir; ?>" />
          <param name="MOTIVO"  value="<?php echo $this->motivo; ?>" />
          <param name="CODIGO"  value="<?php echo $sesion; ?>" />
+         <param name="STAMP_WATERMARK"  value="<?php echo ($watermark ? "true" : "false"); ?>" />
          <param name="PREGUNTAS" value='{ "preguntasRespuestas": []}' />
 		 <param name='codebase_lookup' value='false' />
 	     <param name="classloader_cache" value="false" />
@@ -156,7 +157,7 @@ XML;
 				//BD
 				 $this->generar_tabla();
 
-				//Insertar nueva sesión
+				//Insertar nueva sesiï¿½n
 				$sql = "INSERT INTO firmador_pdf_sesion (sesion) VALUES (".$this->db->quote($this->sesion).")";
 				$this->db->exec($sql);
 			 } elseif ($this->sesion_handler == 'php') {

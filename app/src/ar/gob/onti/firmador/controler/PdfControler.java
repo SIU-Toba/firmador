@@ -1,14 +1,12 @@
 package ar.gob.onti.firmador.controler;
 
 import java.io.ByteArrayInputStream;
-import java.io.Console;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.math.BigInteger;
 import java.net.URISyntaxException;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
@@ -19,7 +17,6 @@ import java.security.SecureRandom;
 import java.security.Security;
 import java.security.UnrecoverableKeyException;
 import java.security.cert.Certificate;
-import java.security.cert.CertificateEncodingException;
 import java.security.cert.CertificateException;
 import java.security.cert.X509CRL;
 import java.security.cert.X509CRLEntry;
@@ -27,11 +24,8 @@ import java.security.cert.X509Certificate;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.Iterator;
-import java.util.Map;
 import java.util.Set;
-import java.util.StringTokenizer;
 import java.util.TimeZone;
 import java.util.logging.Logger;
 
@@ -44,18 +38,20 @@ import sun.security.pkcs11.Secmod.Module;
 import sun.security.pkcs11.Secmod.ModuleType;
 import sun.security.pkcs11.SunPKCS11;
 import ar.gob.onti.firmador.controler.conection.HttpFileDownLoader;
-import ar.gob.onti.firmador.exception.MozillaKeyStoreException;
 import ar.gob.onti.firmador.model.AppleSafari;
 import ar.gob.onti.firmador.model.CRLInfo;
 import ar.gob.onti.firmador.model.ChromeLinux;
 import ar.gob.onti.firmador.model.Mozilla;
 import ar.gob.onti.firmador.model.PropsConfig;
 import ar.gob.onti.firmador.model.Provider;
+import ar.gob.onti.firmador.model.ProvidersConfig;
 import ar.gob.onti.firmador.model.Proxy;
+import ar.gob.onti.firmador.util.HexUtils;
 
 import com.itextpdf.text.DocumentException;
 import com.itextpdf.text.Image;
 import com.itextpdf.text.Rectangle;
+import com.itextpdf.text.pdf.PdfAnnotation;
 import com.itextpdf.text.pdf.PdfContentByte;
 import com.itextpdf.text.pdf.PdfDictionary;
 import com.itextpdf.text.pdf.PdfLiteral;
@@ -66,9 +62,8 @@ import com.itextpdf.text.pdf.PdfSigGenericPKCS;
 import com.itextpdf.text.pdf.PdfSignatureAppearance;
 import com.itextpdf.text.pdf.PdfStamper;
 import com.itextpdf.text.pdf.PdfString;
+import com.itextpdf.text.pdf.PdfTemplate;
 import com.sun.security.auth.callback.DialogCallbackHandler;
-import ar.gob.onti.firmador.model.ProvidersConfig;
-import ar.gob.onti.firmador.util.HexUtils;
 
 /**
  * Controler encargado de realizar la logica necesaria para la firma 
@@ -629,46 +624,7 @@ public class PdfControler {
 			signError += "\r\nError Cause:" + e.getCause().getClass().getName();
 		}
 	}
-	/**
-	 * Se aplica una firma digital a un documento,  posiblemente como una nueva revisión, 
-	 * lo que hace posible varias firmas. si retorna null es que el docuemnto no tiene
-	 * firmas previas entonces se cera una instancia sin firmas previas sino es que el pdf
-	 * tiene firmas previas entonces se agregara a la existente la nuevo firma
-	 * @param fout
-	 * @param reader
-	 * @return
-	 * @throws IOException
-	 * @throws DocumentException
-	 */
-	private PdfStamper getPdfStamper(FileOutputStream fout,PdfReader reader) throws IOException, DocumentException{
-		PdfStamper stp=null;
-		try {
-			stp = PdfStamper.createSignature(reader, fout, '\0',null, true);
-		} catch (com.itextpdf.text.DocumentException e) {
-			e.printStackTrace();
-			loguearExcepcion(e);
-		}
-		if(stp==null){
-			PdfReader newReader = new PdfReader(PropsConfig.getInstance().getSourceDir() +File.separator+ nombreArchivoFirmado);
-			stp = PdfStamper.createSignature(newReader, fout, '\0');
 
-			//Marca de agua
-	        int number_of_pages = newReader.getNumberOfPages();
-	        int i = 0;
-	        ClassLoader cl = this.getClass().getClassLoader();
-	        
-	        Image watermark_image = Image.getInstance(cl.getResource("images/watermark.jpg"));
-	        
-	        watermark_image.setAbsolutePosition(200, 400);
-	        PdfContentByte add_watermark;            
-	        while (i < number_of_pages) {
-	          i++;
-	          add_watermark = stp.getUnderContent(i);
-	          add_watermark.addImage(watermark_image);
-	        }
-		}
-		return stp;
-	}
 	/**
 	 * setea los valores necesarios para agregar el archivo pdf
 	 * @param sap
@@ -710,6 +666,7 @@ public class PdfControler {
 		// Calculo de hash
 		return messageDigest.digest();
 	}
+	
 	private void firmaYverificacionPdf(PdfSignatureAppearance sap) throws NoSuchAlgorithmException, IOException, DocumentException{
 		// Obtiene la instancia que se encarga del
 		// firmado y verificacion del documento
@@ -727,6 +684,7 @@ public class PdfControler {
 		dic.put(PdfName.CONTENTS, new PdfString(outc).setHexWriting(true));
 		sap.close(dic);
 	}
+	
 	/**
 	 * Metodo encargado de firmar el pdf descargado que se encuentra enn la carpeta
 	 * de archivos temporales del sistema operativo y generar uno nuevo en la cerpeta temporal 
@@ -756,34 +714,41 @@ public class PdfControler {
 			// Se crea el apuntador al archivo de entrada 
 			errOpera = "(PdfReader new)"; 
 			reader = new PdfReader(path+nombreArchivoParaFirmar);
-			errOpera = "(PdfStamper.createSignature)"; 
-			PdfStamper stp=getPdfStamper(fout,reader);
+			errOpera = "(PdfStamper.createSignature)";
+			PdfStamper stp = PdfStamper.createSignature(reader, fout, '\0',null, true);
 			errOpera = "(PdfStamper.getSignatureAppearence)"; 
 			PdfSignatureAppearance sap = stp.getSignatureAppearance();
 			errOpera = "(PdfSignatureAppearence.getNumberOfPages)";
 
-			int number_of_pages = reader.getNumberOfPages();
-	        int i = 0;
-	        ClassLoader cl = this.getClass().getClassLoader();
-			errOpera = "(PdfSignatureAppearence.setAbsolutePosition)";
-	        PdfContentByte add_watermark;            
-			errOpera = "(PdfSignatureAppearence.number_of_pages)";
-
-            Image watermark_image = Image.getInstance(cl.getResource("images/watermark.png"));
-	        while (i < number_of_pages) {
-	          i++;
-	          add_watermark = stp.getOverContent(i);
- 			  Rectangle size = reader.getPageSize(i);
- 		      errOpera = "(PdfSignatureAppearence.Image)";
-
-
- 	          for (int y = 0; y < size.getHeight(); y += watermark_image.getHeight()) {
- 	        	  for (int x = 0; x < size.getWidth(); x += watermark_image.getWidth()) {
-					  watermark_image.setAbsolutePosition(x, y);
-			          add_watermark.addImage(watermark_image);
-	 	          }
- 	          }
-	        }
+			
+			//Watermark
+			if (PropsConfig.getInstance().getStampWatermark()) {
+				//Se utiliza un template y anottation para no cambiar el contenido del documento y no invalidar la firma
+				//Sacado de aca: http://itext-general.2136553.n4.nabble.com/Digital-Signature-Corrupted-after-adding-watermark-image-td4657457.html
+				errOpera = "(firmarDigitalmenteArchivoPdf.watermark)";
+		        ClassLoader cl = this.getClass().getClassLoader();
+		        Image watermark_image = Image.getInstance(cl.getResource("images/watermark.png"));
+	            watermark_image.setAbsolutePosition(0, 0); 
+	
+	            PdfTemplate template = PdfTemplate.createTemplate(stp.getWriter(), 
+	            		watermark_image.getWidth(), watermark_image.getHeight()); 
+	            template.addImage(watermark_image);             
+	            
+				int number_of_pages = reader.getNumberOfPages();
+		        int i = 0;      
+		        float width = watermark_image.getWidth();
+		        float height = watermark_image.getHeight();
+		        while (i < number_of_pages) {
+		        	i++;
+		        	Rectangle pageSize = reader.getPageSize(i);
+		            Rectangle rect = new Rectangle(pageSize.getWidth()/2 - width/2, pageSize.getHeight()/2 - height/2, 
+		            								pageSize.getWidth()/2 + width/2, pageSize.getHeight()/2 + height/2); 
+		 		    PdfAnnotation annotation = PdfAnnotation.createStamp(stp.getWriter(), rect, 
+		 		        null, "AnnotationOnly"); 
+		 		    annotation.setAppearance(PdfName.N, template);	        	
+		        	stp.addAnnotation(annotation, i);
+		        }
+			}
 
 			errOpera = "(PdfSignatureAppearence.setCrypto)";
 			if(currentKeyStoreData.getCrlInfo()!=null){
