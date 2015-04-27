@@ -1,4 +1,4 @@
-# Applet Firmador Digital de documentos PDF 
+# Applet Firmador Digital de PDF 
 
 El applet firmador de PDF es un desarrollo basado en el [firmador pdf de la ONTI](http://cluster.softwarepublico.gob.ar/redmine/projects/firmador-digital). El link actualmente se encuentra caido, pero ahí estaba el proyecto originalmente publicado en 2013 con una licencia libre.
 
