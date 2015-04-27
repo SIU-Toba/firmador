@@ -19,19 +19,19 @@ El applet firmador de PDF es un desarrollo basado en el [firmador pdf de la ONTI
 Existen tres comunicaciones via javascript:
 ```
 
-        /** Callback que se llama al terminar la carga del Applet **/
-		function appletLoaded() {
-		}
+	/** Callback que se llama al terminar la carga del Applet **/
+	function appletLoaded() {
+	}
 		
-		/** Callback que se llama al terminar la firma **/
-		function firmaOk() {
-		}
+	/** Callback que se llama al terminar la firma **/
+	function firmaOk() {
+	}
 		
-		/** Para el caso de firma múltiple, agrega un documento al lote de firma **/
-		document.AppletFirmador.agregarDocumento(id, url_descarga);
+	/** Para el caso de firma múltiple, agrega un documento al lote de firma **/
+	document.AppletFirmador.agregarDocumento(id, url_descarga);
 		
-		/** Para el caso de firma múltiple, quita un documento previamente agregado al lote de firma **/
-		document.AppletFirmador.quitarDocumento(id);
+	/** Para el caso de firma múltiple, quita un documento previamente agregado al lote de firma **/
+	document.AppletFirmador.quitarDocumento(id);
 ```
 
 ## Integración con SIU-Toba
@@ -48,8 +48,11 @@ se llama [firmador_pdf.php](https://github.com/SIU-Toba/firmador/blob/master/sam
   ```
 * Abrir ```http://localhost/firmador_pdf```
 
- 
-
+ ## Compilación
+ #### Requisitos previos
+ * [JAVA JDK1.6.0.33 x86](http://www.oracle.com/technetwork/java/javase/archive-139210.html)
+ * [Maven ](http://maven.apache.org/download.html)
+ * [iText](http://olex.openlogic.com/packages/itext/5.0.2)
 
 
 
