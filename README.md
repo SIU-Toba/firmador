@@ -1,8 +1,16 @@
 # Applet Firmador Digital de documentos PDF 
-El applet firmador de PDF es un desarrollo basado en el [firmador pdf de la ONTI](http://cluster.softwarepublico.gob.ar/redmine/projects/firmador-digital) (el link actualmente se encuentra caido, pero ahí estaba el proyecto originalmente publicado con una licencia libre)
+
+El applet firmador de PDF es un desarrollo basado en el [firmador pdf de la ONTI](http://cluster.softwarepublico.gob.ar/redmine/projects/firmador-digital). El link actualmente se encuentra caido, pero ahí estaba el proyecto originalmente publicado en 2013 con una licencia libre.
+
+Funcionalidad:
+* Funciona con un token-usb o keystore del navegador/SO.
+* Permite firmar un único o múltiples documentos individuales.
+* Valida la vigencia de certificados y OCSP (chequeo certificados revocados). Chequeo cadena de certificados (trusted-certificates)
+* Visualización inline del documento (si lo permite navegador). Descarga/apertura en SO.
+* Integración sencilla con aplicaciones (ejemplos con PHP standalone y SIU-Toba)
+
 
 ## Integración con Aplicaciones Web
-
 * Publicar `firmador.jar`
 * Incluir el siguiente código HTML, definiendo los valores:
 
