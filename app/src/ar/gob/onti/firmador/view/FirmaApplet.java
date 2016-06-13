@@ -97,6 +97,8 @@ public class FirmaApplet extends JApplet{
 		String cookie = this.getParameter("COOKIE");
 		String multiple = this.getParameter("MULTIPLE");
 		String stampWatermark = this.getParameter("STAMP_WATERMARK");
+                                   String csrfParamName = this.getParameter("TOKID");
+                                   String csrfParamValue = this.getParameter("TOKVAL");
 		
 		PreguntasRespuestas preguntas = new PreguntasRespuestas();
 		preguntas.parse(URLDecoder.decode(this.getParameter("PREGUNTAS")));
@@ -116,6 +118,9 @@ public class FirmaApplet extends JApplet{
 		config.setMultiple(multiple != null && multiple.equalsIgnoreCase("true"));
 		config.setStampWatermark(stampWatermark == null || stampWatermark.equalsIgnoreCase("true"));
 		config.setVisible(true);
+                                   if (csrfParamName != null) {
+                                       config.setCrossSiteToken(csrfParamName, csrfParamValue);
+                                   }
 		myMainWin.initProps(this);
 		myMainWin.initLogFile(this);
 		myMainWin.initSigner(this);

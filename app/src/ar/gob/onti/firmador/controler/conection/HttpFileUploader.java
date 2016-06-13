@@ -157,20 +157,20 @@ public class HttpFileUploader extends HttpFileConnection {
 		
 	}
 	/**
-	 * Una vez firmado digitalmente el documento pdf,  en el último paso envía mediante 
-	 * un post el archivo pdf firmado con los siguientes parámetros que pueden ser 
-	 * usados por su aplicación para verificar la validez de la firma del documento.
+	 * Una vez firmado digitalmente el documento pdf,  en el Ãºltimo paso envÃ­a mediante 
+	 * un post el archivo pdf firmado con los siguientes parÃ¡metros que pueden ser 
+	 * usados por su aplicaciÃ³n para verificar la validez de la firma del documento.
 	 *
 	 *	md5_file.-  Hash  md5 del archivo descargado a la carpeta temporal para ser firmado.
 	 *	md5_fileSigned.- Hash  md5 del archivo pdf firmado digitalmente.
 	 *	serialCert.- Serial del certificado con el que se firmo el archivo
 	 *	hashCert.- Hash del certificado
-	 *	codigo.- este parámetro es un código interno que puede ser usado por su aplicación 
-	 * para identificar el documento o el tipo de documento a ser firmado, este código 
+	 *	codigo.- este parÃ¡metro es un cÃ³digo interno que puede ser usado por su aplicaciÃ³n 
+	 * para identificar el documento o el tipo de documento a ser firmado, este cÃ³digo 
 	 * es devuelto sin ser modificado, en el post de subida del archivo.
-	 * El post debe devolver “OK” en caso que de que las validaciones de seguridad del 
-	 * archivo con los parámetros recibidos  sean exitosas, en caso contrario deberá 
-	 * devolver el error ocurrido, que será mostrado al usuario.
+	 * El post debe devolver Â“OKÂ” en caso que de que las validaciones de seguridad del 
+	 * archivo con los parÃ¡metros recibidos  sean exitosas, en caso contrario deberÃ¡ 
+	 * devolver el error ocurrido, que serÃ¡ mostrado al usuario.
 	 * @param fileName nombre del archiv a enviar
 	 * @param boundary para separea el vio del post
 	 * @param codigo codigo que se recibio como parametro del applet
@@ -179,72 +179,71 @@ public class HttpFileUploader extends HttpFileConnection {
 	 * @return
 	 * @throws IOException 
 	 */
-	public boolean doUpload(Documento documento, PropsConfig myProps,String codigo, String cookie) throws IOException {
-		String errorBuffer="";
-		String fileName = documento.getArchivoFirmado().getPath();
-		try {			
-			PostMethod post = new PostMethod(myProps.getUploadURL());
-			Part[] parts = {
-					new StringPart("codigo", codigo),
-					new StringPart("id", documento.getId()),
-					new FilePart("md5_fileSigned", new File(fileName))};
-			post.setRequestEntity( new MultipartRequestEntity(parts, post.getParams()) );
-			HttpClient client = new HttpClient();
-	        client.getHttpConnectionManager().
-	                getParams().setConnectionTimeout(5000);
+                    public boolean doUpload(Documento documento, PropsConfig myProps,String codigo, String cookie) throws IOException {
+                            String errorBuffer="";
+                            String fileName = documento.getArchivoFirmado().getPath();
+                            try {			
+                                    PostMethod post = new PostMethod(myProps.getUploadURL());
+                                    Part[] parts = {   new StringPart("codigo", codigo),
+                                                                new StringPart("id", documento.getId()),
+                                                                new FilePart("md5_fileSigned", new File(fileName)),
+                                                                new StringPart(myProps.getCrossSiteTokenName(), 
+                                                                                        myProps.getCrossSiteTokenValue())};
+                                    
+                                    post.setRequestEntity( new MultipartRequestEntity(parts, post.getParams()) );
+                                    HttpClient client = new HttpClient();
+                                    client.getHttpConnectionManager().getParams().setConnectionTimeout(5000);
+                                    if (cookie != null && cookie.length() > 0) {
+                                        post.setRequestHeader("Cookie", cookie);
+                                    }
 
-			if (cookie != null && cookie.length() > 0) {
-				post.setRequestHeader("Cookie", cookie);
-			}
+                                    int status = client.executeMethod(post);
+                                    if (status != 200) {
+                                        errorBuffer+="Error de recepciï¿½n en el server status" + status;
+                                        this.setHttpFileError(errorBuffer);
+                                        return false;
+                                    }
+                                    byte[] response = post.getResponseBody();
 
-	        int status = client.executeMethod(post);
-	        if (status != 200) {
-				errorBuffer+="Error de recepción en el server status" + status;
-				this.setHttpFileError(errorBuffer);
-				return false;
-	        }
-	        byte[] response = post.getResponseBody();
-	        
-	        String responseString = new String(response, "UTF-8");
-	        post.releaseConnection();
-	        
-	        
-			if (post.getStatusCode() == 200) {
-				return true;
-			} else {		
-				errorBuffer+="Error de recepción en el server :" +responseString;
-				this.setHttpFileError(errorBuffer);
-				return false;
-			}
-		}
-		catch (SocketException e) {
-            e.printStackTrace();
-			return doUploadApache(documento, myProps, codigo);
-		}
-		catch (Exception e) {
-            e.printStackTrace();            
-            cargarMensajeDeError("", e);
-            return false;
-        }
-        
-	}
+                                    String responseString = new String(response, "UTF-8");
+                                    post.releaseConnection();
+
+
+                                    if (post.getStatusCode() == 200) {
+                                        return true;
+                                    } else {		
+                                        errorBuffer+="Error de recepciï¿½n en el server :" +responseString;
+                                        this.setHttpFileError(errorBuffer);
+                                        return false;
+                                    }
+                            }
+                            catch (SocketException e) {
+                                    e.printStackTrace();
+                                    return doUploadApache(documento, myProps, codigo);
+                            }
+                            catch (Exception e) {
+                                e.printStackTrace();            
+                                cargarMensajeDeError("", e);
+                                return false;
+                            }
+                    }
 	
 	/**
-	 * Una vez firmado digitalmente el documento pdf,  en el último paso envía mediante 
-	 * un post el archivo pdf firmado con los siguientes parámetros que pueden ser 
-	 * usados por su aplicación para verificar la validez de la firma del documento.
+	 * Una vez firmado digitalmente el documento pdf,  en el Ãºltimo paso envÃ­a mediante 
+	 * un post el archivo pdf firmado con los siguientes parÃ¡metros que pueden ser 
+	 * usados por su aplicaciÃ³n para verificar la validez de la firma del documento.
 	 *
 	 *	md5_file.-  Hash  md5 del archivo descargado a la carpeta temporal para ser firmado.
 	 *	md5_fileSigned.- Hash  md5 del archivo pdf firmado digitalmente.
 	 *	serialCert.- Serial del certificado con el que se firmo el archivo
 	 *	hashCert.- Hash del certificado
-	 *	codigo.- este parámetro es un código interno que puede ser usado por su aplicación 
-	 * para identificar el documento o el tipo de documento a ser firmado, este código 
+	 *	codigo.- este parÃ¡metro es un cÃ³digo interno que puede ser usado por su aplicaciÃ³n 
+	 * para identificar el documento o el tipo de documento a ser firmado, este cÃ³digo 
 	 * es devuelto sin ser modificado, en el post de subida del archivo.
-	 * El post debe devolver “OK” en caso que de que las validaciones de seguridad del 
-	 * archivo con los parámetros recibidos  sean exitosas, en caso contrario deberá 
-	 * devolver el error ocurrido, que será mostrado al usuario.
-	 * Esta version está preparada para funcionar mediante proxies HTTP.
+	 * El post debe devolver Â“OKÂ” en caso que de que las validaciones de seguridad del 
+	 * archivo con los parÃ¡metros recibidos  sean exitosas, en caso contrario deberÃ¡ 
+	 * devolver el error ocurrido, que serÃ¡ mostrado al usuario.
+	 * Esta version estÃ¡ preparada para funcionar mediante proxies HTTP.
 	 * @param fileName nombre del archiv a enviar
 	 * @param boundary para separea el vio del post
 	 * @param codigo codigo que se recibio como parametro del applet
@@ -300,7 +299,7 @@ public class HttpFileUploader extends HttpFileConnection {
 
 	        //int status = httpclient.execute(post);
 	        if (status != 200) {
-				errorBuffer+="Error de recepción en el server status" + responseString;
+				errorBuffer+="Error de recepciÃ³n en el server status" + responseString;
 				this.setHttpFileError(errorBuffer);
 				return false;
 	        } else {
