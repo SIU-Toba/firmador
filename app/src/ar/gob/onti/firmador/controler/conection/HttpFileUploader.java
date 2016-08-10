@@ -186,9 +186,9 @@ public class HttpFileUploader extends HttpFileConnection {
                                     PostMethod post = new PostMethod(myProps.getUploadURL());
                                     Part[] parts = {   new StringPart("codigo", codigo),
                                                                 new StringPart("id", documento.getId()),
-                                                                new FilePart("md5_fileSigned", new File(fileName)),
-                                                                new StringPart(myProps.getCrossSiteTokenName(), 
-                                                                                        myProps.getCrossSiteTokenValue())};
+								new StringPart(myProps.getCrossSiteTokenName(),myProps.getCrossSiteTokenValue()),
+                                                                new FilePart("md5_fileSigned", new File(fileName))
+								};
                                     
                                     post.setRequestEntity( new MultipartRequestEntity(parts, post.getParams()) );
                                     HttpClient client = new HttpClient();
@@ -268,6 +268,7 @@ public class HttpFileUploader extends HttpFileConnection {
 			Part[] parts = {
 					new StringPart("codigo", codigo),
 					new StringPart("id", documento.getId()),
+					new StringPart(myProps.getCrossSiteTokenName(),myProps.getCrossSiteTokenValue()),
 					new FilePart("md5_fileSigned", new File(fileName))};
 			
 			String boundary = Part.getBoundary();
