@@ -391,6 +391,7 @@ public class PdfControler {
 		ArrayList<SunPKCS11> sunpkcs = new ArrayList<SunPKCS11>(); 
 		if(!secmod.isInitialized()){
 			for (int n = 0; n < cfgProvider.length; n++) {
+                //System.out.println("Provider " + cfgProvider[n]);
 				SunPKCS11 provider = new SunPKCS11(new ByteArrayInputStream(cfgProvider[n].getBytes()));
 				Security.addProvider(provider);
 				sunpkcs.add(provider);
@@ -490,9 +491,10 @@ public class PdfControler {
 		for (int n = 0; n < providers.size(); n++) {
 			try {
 				File libraryFile = new File(providers.get(n).getLibrary());
+                //System.out.println("Path al archivo: " + libraryFile.getPath());
 				if (libraryFile.exists()) {
-					configs.add("name=" + providers.get(n).getName() + "\nlibrary=" + providers.get(n).getLibrary());
-				}
+					configs.add("name=" + providers.get(n).getName() + "\nlibrary=" + libraryFile.getPath());
+				}                       
 			} 
 			catch (Exception e) {
 				e.printStackTrace();
@@ -561,14 +563,15 @@ public class PdfControler {
 				} */
 				if (this.signProps.getBrowser().equalsIgnoreCase("FIREFOX")) {
 					errOpera = "cargarConfiguracionProviderFirefox";
-					cfgProvider =cargarConfiguracionProviderFirefox();
+					cfgProvider = cargarConfiguracionProviderFirefox();
 					errOpera = "cargarKeyStorePKSC11";
+                    //System.out.println("Firefox cfg: " + cfgProvider[0]);
 					cargarKeyStorePKSC11(cfgProvider, OriginType.browser);
 					System.out.println("Keystore cargado: Firefox");									
 				}
 				if (this.signProps.getBrowser().equalsIgnoreCase("CHROME_LINUX")) {
 					errOpera = "cargarConfiguracionProviderChromeLinux";
-					cfgProvider =cargarConfiguracionProviderChromeLinux();
+					cfgProvider = cargarConfiguracionProviderChromeLinux();
 					errOpera = "cargarKeyStorePKSC11";
 					cargarKeyStorePKSC11(cfgProvider, OriginType.browser);
 					System.out.println("Keystore cargado: Chrome linux");									

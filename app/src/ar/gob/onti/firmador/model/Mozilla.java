@@ -1,22 +1,22 @@
 /**
 * LICENCIA LGPL:
 * 
-* Esta librerÌa es Software Libre; Usted puede redistribuirla y/o modificarla
-* bajo los tÈrminos de la GNU Lesser General Public License (LGPL) tal y como 
-* ha sido publicada por la Free Software Foundation; o bien la versiÛn 2.1 de 
-* la Licencia, o (a su elecciÛn) cualquier versiÛn posterior.
+* Esta librer√≠a es Software Libre; Usted puede redistribuirla y/o modificarla
+* bajo los t√©rminos de la GNU Lesser General Public License (LGPL) tal y como 
+* ha sido publicada por la Free Software Foundation; o bien la versi√≥n 2.1 de 
+* la Licencia, o (a su elecci√≥n) cualquier versi√≥n posterior.
 * 
-* Esta librerÌa se distribuye con la esperanza de que sea ˙til, pero SIN 
-* NINGUNA GARANTÕA; tampoco las implÌcitas garantÌas de MERCANTILIDAD o 
-* ADECUACI”N A UN PROP”SITO PARTICULAR. Consulte la GNU Lesser General Public 
-* License (LGPL) para m·s detalles
+* Esta librer√≠a se distribuye con la esperanza de que sea √∫til, pero SIN 
+* NINGUNA GARANT√çA; tampoco las impl√≠citas garant√≠as de MERCANTILIDAD o 
+* ADECUACI√ìN A UN PROP√ìSITO PARTICULAR. Consulte la GNU Lesser General Public 
+* License (LGPL) para m√°s detalles
 * 
 * Usted debe recibir una copia de la GNU Lesser General Public License (LGPL) 
-* junto con esta librerÌa; si no es asÌ, escriba a la Free Software Foundation 
-* Inc. 51 Franklin Street, 5∫ Piso, Boston, MA 02110-1301, USA o consulte
+* junto con esta librer√≠a; si no es as√≠, escriba a la Free Software Foundation 
+* Inc. 51 Franklin Street, 5¬∫ Piso, Boston, MA 02110-1301, USA o consulte
 * <http://www.gnu.org/licenses/>.
 *
-* Copyright 2011 Agencia de TecnologÌa y CertificaciÛn ElectrÛnica
+* Copyright 2011 Agencia de Tecnolog√≠a y Certificaci√≥n Electr√≥nica
 */
 
 package ar.gob.onti.firmador.model;
@@ -71,25 +71,25 @@ public class Mozilla {
 	 * Obtiene la ruta a la carpeta donde se encuentra instalado Mozilla
 	 * 
 	 * @return Ruta a la carpeta donde se encuentra instalado Mozilla
-	 * @throws MozillaNotFoundException No se ha encontrado una instalaciÛn de Mozilla
+	 * @throws MozillaNotFoundException No se ha encontrado una instalaci√≥n de Mozilla
 	 */
 	public File getMozillaFolder() throws MozillaNotFoundException {
 		//-- Si el SO es Windows ...
 		if (System.getProperty("os.name").contains("indows")) {
-			System.out.println("[Mozilla]::Buscando la carpeta de instalaciÛn de Mozilla en Windows");
+			System.out.println("[Mozilla]::Buscando la carpeta de instalaci√≥n de Mozilla en Windows");
 			File mozillaFolder = new File (new File (System.getenv("PROGRAMFILES")), "Mozilla Firefox");
 			if (mozillaFolder.exists()) {	
-				System.out.println("[Mozilla]::Se ha encontrado la carpeta de instalaciÛn de Mozilla Firefox en Windows: " + mozillaFolder.getAbsolutePath());
+				System.out.println("[Mozilla]::Se ha encontrado la carpeta de instalaci√≥n de Mozilla Firefox en Windows: " + mozillaFolder.getAbsolutePath());
 				
-				//-- Si el path al directorio contiene caracteres extraÒos no funcionar· la carga del
+				//-- Si el path al directorio contiene caracteres extra√±os no funcionar√° la carga del
 				//-- provider PKCS#11 de SUN
 				if (mozillaFolder.getAbsolutePath().contains(")") || 
 						mozillaFolder.getAbsolutePath().contains("(") || 
 						mozillaFolder.getAbsolutePath().contains("\u007E")) { 
 					
-					//-- Copiar las DLLs a una ubicaciÛn temporal que ser· la que utilizar· a partir de ahora
+					//-- Copiar las DLLs a una ubicaci√≥n temporal que ser√° la que utilizar√° a partir de ahora
 					try {
-						System.out.println("[Mozilla]::La carpeta de instalaciÛn de Mozilla Firefox en Windows contiene caracteres incompatibles con provider PKCS11: " + mozillaFolder.getAbsolutePath());
+						System.out.println("[Mozilla]::La carpeta de instalaci√≥n de Mozilla Firefox en Windows contiene caracteres incompatibles con provider PKCS11: " + mozillaFolder.getAbsolutePath());
 						File mozillaTempFolder = File.createTempFile("mozillaTemp", null);
 						mozillaTempFolder.delete();
 						mozillaTempFolder.mkdirs();
@@ -137,101 +137,101 @@ public class Mozilla {
 		//-- Si el SO es Linux / Unix ...
 		if(System.getProperty("os.name").contains("inux") || System.getProperty("os.name").contains("SunOS") || 
 				System.getProperty("os.name").contains("olaris")){
-			System.out.println("[Mozilla]::Buscando la carpeta con las librerÌas de Mozilla en Linux/Unix");
+			System.out.println("[Mozilla]::Buscando la carpeta con las librer√≠as de Mozilla en Linux/Unix");
 
 			JSObject document = (JSObject) JSCommands.getWindow().getMember("navigator");
 			String userAgent = ((String) document.getMember("userAgent")).toLowerCase();
 
-			if (userAgent.contains("x86_64")) {
+			//if (userAgent.contains("x86_64")) {
 				if (new File("/lib64/libsoftokn3.so").exists()) {
-					System.out.println("[Mozilla]::Se ha encontrado la carpeta con las librerÌas de Mozilla Firefox en Linux/Unix: /lib64");
+					System.out.println("[Mozilla]::Se ha encontrado la carpeta con las librer√≠as de Mozilla Firefox en Linux/Unix: /lib64");
 					return new File("/lib64");
 				}
 				if (new File("/usr/lib64/libsoftokn3.so").exists()) {
-					System.out.println("[Mozilla]::Se ha encontrado la carpeta con las librerÌas de Mozilla Firefox en Linux/Unix: /usr/lib64");
+					System.out.println("[Mozilla]::Se ha encontrado la carpeta con las librer√≠as de Mozilla Firefox en Linux/Unix: /usr/lib64");
 					return new File("/usr/lib64");
 				}
 				if (new File("/usr/lib64/firefox/libsoftokn3.so").exists()) {
-					System.out.println("[Mozilla]::Se ha encontrado la carpeta con las librerÌas de Mozilla Firefox en Linux/Unix: /usr/lib64/firefox");
+					System.out.println("[Mozilla]::Se ha encontrado la carpeta con las librer√≠as de Mozilla Firefox en Linux/Unix: /usr/lib64/firefox");
 					return new File("/usr/lib64/firefox");
 				}
 				if (new File("/usr/lib64/mozilla/libsoftokn3.so").exists()) {
-					System.out.println("[Mozilla]::Se ha encontrado la carpeta con las librerÌas de Mozilla Firefox en Linux/Unix: /usr/lib64/mozilla");
+					System.out.println("[Mozilla]::Se ha encontrado la carpeta con las librer√≠as de Mozilla Firefox en Linux/Unix: /usr/lib64/mozilla");
 					return new File("/usr/lib64/mozilla");
 				}
 				if (new File("/usr/lib64/nss/libsoftokn3.so").exists()) {
-					System.out.println("[Mozilla]::Se ha encontrado la carpeta con las librerÌas de Mozilla Firefox en Linux/Unix: /usr/lib64/nss");
+					System.out.println("[Mozilla]::Se ha encontrado la carpeta con las librer√≠as de Mozilla Firefox en Linux/Unix: /usr/lib64/nss");
 					return new File("/usr/lib64/nss");
 				}				
-			} else {
+			//} else {
 				if (new File("/lib/libsoftokn3.so").exists()) {
-					System.out.println("[Mozilla]::Se ha encontrado la carpeta con las librerÌas de Mozilla Firefox en Linux/Unix: /lib");
+					System.out.println("[Mozilla]::Se ha encontrado la carpeta con las librer√≠as de Mozilla Firefox en Linux/Unix: /lib");
 					return new File("/lib");
 				}
 				if (new File("/usr/lib/libsoftokn3.so").exists()) {
-					System.out.println("[Mozilla]::Se ha encontrado la carpeta con las librerÌas de Mozilla Firefox en Linux/Unix: /usr/lib");
+					System.out.println("[Mozilla]::Se ha encontrado la carpeta con las librer√≠as de Mozilla Firefox en Linux/Unix: /usr/lib");
 					return new File("/usr/lib");
 				}
 				if (new File("/usr/lib/firefox/libsoftokn3.so").exists()) {
-					System.out.println("[Mozilla]::Se ha encontrado la carpeta con las librerÌas de Mozilla Firefox en Linux/Unix: /usr/lib/firefox");
+					System.out.println("[Mozilla]::Se ha encontrado la carpeta con las librer√≠as de Mozilla Firefox en Linux/Unix: /usr/lib/firefox");
 					return new File("/usr/lib/firefox");
 				}
 				if (new File("/usr/lib/mozilla/libsoftokn3.so").exists()) {
-					System.out.println("[Mozilla]::Se ha encontrado la carpeta con las librerÌas de Mozilla Firefox en Linux/Unix: /usr/lib/mozilla");
+					System.out.println("[Mozilla]::Se ha encontrado la carpeta con las librer√≠as de Mozilla Firefox en Linux/Unix: /usr/lib/mozilla");
 					return new File("/usr/lib/mozilla");
 				}
 				if (new File("/usr/lib/nss/libsoftokn3.so").exists()) {
-					System.out.println("[Mozilla]::Se ha encontrado la carpeta con las librerÌas de Mozilla Firefox en Linux/Unix: /usr/lib/nss");
+					System.out.println("[Mozilla]::Se ha encontrado la carpeta con las librer√≠as de Mozilla Firefox en Linux/Unix: /usr/lib/nss");
 					return new File("/usr/lib/nss");
 				}				
-			}
+			//}
 		}
 		
 		//-- Si el SO es Mac OS X
 		if(System.getProperty("os.name").startsWith("Mac OS X")) {
-			System.out.println("[Mozilla]::Buscando la carpeta con las librerÌas de Mozilla en Mac OS X");
+			System.out.println("[Mozilla]::Buscando la carpeta con las librer√≠as de Mozilla en Mac OS X");
 			File tmpFile = new File("/Applications/Firefox.app/Contents/MacOS/libsoftokn3.dylib"); 
 			if (tmpFile.exists()) {
-				System.out.println("[Mozilla]::Se ha encontrado la carpeta con las librerÌas de Mozilla Firefox en Mac OS X: /Applications/Firefox.app/Contents/MacOS");
+				System.out.println("[Mozilla]::Se ha encontrado la carpeta con las librer√≠as de Mozilla Firefox en Mac OS X: /Applications/Firefox.app/Contents/MacOS");
 				return new File("/Applications/Firefox.app/Contents/MacOS");
 			}
 			tmpFile = new File("/lib/libsoftokn3.dylib"); 
 			if (tmpFile.exists()) {
-				System.out.println("[Mozilla]::Se ha encontrado la carpeta con las librerÌas de Mozilla Firefox en Mac OS X: /lib");
+				System.out.println("[Mozilla]::Se ha encontrado la carpeta con las librer√≠as de Mozilla Firefox en Mac OS X: /lib");
 				return new File("/lib");
 			}
 			tmpFile = new File("/usr/lib/libsoftokn3.dylib"); 
 			if (tmpFile.exists()) {
-				System.out.println("[Mozilla]::Se ha encontrado la carpeta con las librerÌas de Mozilla Firefox en Mac OS X: /usr/lib");
+				System.out.println("[Mozilla]::Se ha encontrado la carpeta con las librer√≠as de Mozilla Firefox en Mac OS X: /usr/lib");
 				return new File("/usr/lib");
 			}
 			tmpFile = new File("/usr/lib/nss/libsoftokn3.dylib"); 
 			if (tmpFile.exists()) {
-				System.out.println("[Mozilla]::Se ha encontrado la carpeta con las librerÌas de Mozilla Firefox en Mac OS X: /usr/lib/nss");
+				System.out.println("[Mozilla]::Se ha encontrado la carpeta con las librer√≠as de Mozilla Firefox en Mac OS X: /usr/lib/nss");
 				return new File ("/usr/lib/nss");
 			}
 			// Las versiones Alpha de Firefox se llaman Minefield
 			tmpFile = new File("/Applications/Minefield.app/Contents/MacOS/libsoftokn3.dylib"); 
 			if (tmpFile.exists()) {
-				System.out.println("[Mozilla]::Se ha encontrado la carpeta con las librerÌas de Mozilla Firefox en Mac OS X: /Applications/Minefield.app/Contents/MacOS");
+				System.out.println("[Mozilla]::Se ha encontrado la carpeta con las librer√≠as de Mozilla Firefox en Mac OS X: /Applications/Minefield.app/Contents/MacOS");
 				return new File ("/Applications/Minefield.app/Contents/MacOS");
 			}
 		}
 		
-		System.out.println("[Mozilla]::No se ha podido obtener la carpeta de instalaciÛn de Mozilla Firefox");
-		throw new MozillaNotFoundException("No se ha podido obtener la carpeta de instalaciÛn de Mozilla Firefox");
+		System.out.println("[Mozilla]::No se ha podido obtener la carpeta de instalaci√≥n de Mozilla Firefox");
+		throw new MozillaNotFoundException("No se ha podido obtener la carpeta de instalaci√≥n de Mozilla Firefox");
 	}
 
 	/**
-	 * Obtiene la ruta donde se encuentran los ficheros con el almacÈn de claves de Mozilla
+	 * Obtiene la ruta donde se encuentran los ficheros con el almac√©n de claves de Mozilla
 	 * 
-	 * @return Ruta donde se encuentran los ficheros con el almacÈn de claves de Mozilla
-	 * @throws MozillaNotFoundException No se ha encontrado una instalaciÛn de Mozilla
+	 * @return Ruta donde se encuentran los ficheros con el almac√©n de claves de Mozilla
+	 * @throws MozillaNotFoundException No se ha encontrado una instalaci√≥n de Mozilla
 	 */
 	private File getSecModFolder() throws MozillaNotFoundException {
 		
 		if (System.getProperty("os.name").contains("indows")) {
-			System.out.println("[Mozilla]::Buscando el almacÈn de claves de Mozilla en Windows");
+			System.out.println("[Mozilla]::Buscando el almac√©n de claves de Mozilla en Windows");
 			
 			//-- Buscar carpeta de mozilla en Datos de Programa del usuario
 			File secModFolder = new File (new File (System.getenv("APPDATA")), "Mozilla/Firefox");
@@ -258,7 +258,7 @@ public class Mozilla {
 		}
 		
 		//-- Si estamos en un Linux...
-		System.out.println("[Mozilla]::Buscando el almacÈn de claves de Mozilla en Linux");
+		System.out.println("[Mozilla]::Buscando el almac√©n de claves de Mozilla en Linux");
 		File regFile = new File(new File (System.getProperty("user.home")), "/.mozilla/firefox/profiles.ini");
 		if (regFile.exists()) {
 			try {
@@ -286,8 +286,8 @@ public class Mozilla {
 			try {
 				return getFirefoxProfileDirectory(regFile);
 			} catch (Exception e) {
-				System.out.println("[Mozilla]::No se ha podido obtener la carpeta con el perfil del usuario con el registro cl·sico de Mozilla " + e.getMessage());
-				throw new MozillaNotFoundException("No se ha podido obtener la carpeta con el perfil del usuario con el registro cl·sico de Mozilla", e);
+				System.out.println("[Mozilla]::No se ha podido obtener la carpeta con el perfil del usuario con el registro cl√°sico de Mozilla " + e.getMessage());
+				throw new MozillaNotFoundException("No se ha podido obtener la carpeta con el perfil del usuario con el registro cl√°sico de Mozilla", e);
 			}
 		}
 
@@ -440,9 +440,9 @@ public class Mozilla {
 	}
 	
 	/**
-	* Obtiene el nombre de la librerÌa del provider NSS dependiendo del SO
+	* Obtiene el nombre de la librer√≠a del provider NSS dependiendo del SO
 	* 
-	* @return Nombre de la librerÌa del provider NSS
+	* @return Nombre de la librer√≠a del provider NSS
 	*/
 	public String getMozillaNSSLibraryName () {
 			String nssLib = "libsoftokn3.so";
@@ -473,8 +473,16 @@ public class Mozilla {
 			   "keyPrefix='' " + 
 			   "secmod=' secmod.db' " + 
 			   "flags=readWrite\"\r";
+            
+            /*String providerConfig = "name = " + PROVIDER_NAME + "\r" + 
+              "nssLibraryDirectory = " + new File (mozillaFolder, getMozillaNSSLibraryName()).getCanonicalPath() + "\r" + 
+              "attributes= compatibility" + "\r" +
+              "nssSecmodDirectory='" + secModFolder.getCanonicalPath() + "'\r" +
+              "nssModule = keystore";*/
 
+            //System.out.println("Firefox cfg orishinal: " + providerConfig);
 			providerConfig = providerConfig.replaceAll("\\\\", "/");
+            //System.out.println("Firefox cfg orishinal after replace: " + providerConfig);
 			return providerConfig;
 		
 		} catch (MozillaNotFoundException e) {
