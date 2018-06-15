@@ -42,6 +42,8 @@ import java.util.Map;
  * < param  name="URL_SUBIR"	value=" http://ip:puerto /rutaApplicacion/post_subir_archivo">
  * < param  name="MOTIVO"  value="Firmar Dictamen">
  * < param  name="CODIGO"  value="23|233|PLIEGO|19" />
+ * < param  name="TOKID"  value="crsf_token_name" />
+ * < param  name="TOKVAL"  value="d4da80h22\safdsa" />
  *   </applet>
  *
  * @author ocaceres
@@ -97,8 +99,8 @@ public class FirmaApplet extends JApplet{
 		String cookie = this.getParameter("COOKIE");
 		String multiple = this.getParameter("MULTIPLE");
 		String stampWatermark = this.getParameter("STAMP_WATERMARK");
-                                   String csrfParamName = this.getParameter("TOKID");
-                                   String csrfParamValue = this.getParameter("TOKVAL");
+        String csrfParamName = this.getParameter("TOKID");
+        String csrfParamValue = this.getParameter("TOKVAL");
 		
 		PreguntasRespuestas preguntas = new PreguntasRespuestas();
 		preguntas.parse(URLDecoder.decode(this.getParameter("PREGUNTAS")));
@@ -118,9 +120,10 @@ public class FirmaApplet extends JApplet{
 		config.setMultiple(multiple != null && multiple.equalsIgnoreCase("true"));
 		config.setStampWatermark(stampWatermark == null || stampWatermark.equalsIgnoreCase("true"));
 		config.setVisible(true);
-                                   if (csrfParamName != null) {
-                                       config.setCrossSiteToken(csrfParamName, csrfParamValue);
-                                   }
+        if (csrfParamName != null) {
+            config.setCrossSiteToken(csrfParamName, csrfParamValue);
+            //System.out.println("crossSiteToken value loaded: " + csrfParamValue);
+        }
 		myMainWin.initProps(this);
 		myMainWin.initLogFile(this);
 		myMainWin.initSigner(this);

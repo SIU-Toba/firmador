@@ -521,8 +521,8 @@ public class PdfControler {
 		String errOpera = "";
 		
 		//1- Intenta cargar keystore de windows
-		String os = System.getProperty("os.name").toLowerCase();
-		if (os.contains("win")) {		
+		//String os = System.getProperty("os.name").toLowerCase();
+		/*if (os.contains("win")) {		
 			try {
 				if(!this.keyStoreDataCollection[OriginType.browser.ordinal()].isKeyStoreOpen()){			
 						errOpera = "cargarKeyStoreWindows";
@@ -535,7 +535,7 @@ public class PdfControler {
 				cargarMensajeDeError(PropsConfig.getInstance().getString(ERROR_ALMACEN),errOpera,e);
 				loguearExcepcion(e);
 			}
-		}
+		}*/
 		
 		//2- Si falla, o no es windows, intenta cargar el keystore desde el token usando pkcs11 
 		try {
@@ -711,6 +711,11 @@ public class PdfControler {
 		String errOpera="";
 		String path=PropsConfig.getInstance().getSourceDir() +File.separator;
 		try {
+            errOpera = "currentKeyStoreData.isKeyStoreOpen()";
+            if (! currentKeyStoreData.isKeyStoreOpen()) {                
+                errOpera = "cargarKeyStore2";
+                throw new IOException("El keystore no se encuentra abierto");	
+            }
 			// Se crea el archivo destino
 			errOpera = "(new FileOutputStream)"; 
 			fout = new FileOutputStream(path+nombreArchivoFirmado);

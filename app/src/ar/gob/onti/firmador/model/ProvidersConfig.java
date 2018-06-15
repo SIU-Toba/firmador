@@ -27,7 +27,6 @@ public final class ProvidersConfig {
 		         String key = e.nextElement();
 		         temp.add(key);
 		      }
-
 		      // store the bundle Strings in the StringArray
 		      for (int i = 0; i < temp.size(); i++) {
 		    	 Provider provider = new Provider();
@@ -35,6 +34,11 @@ public final class ProvidersConfig {
 		    	 provider.setLibrary(bundle.getString(temp.get(i)));
 		    	 result.add(provider);
 		      }
+//                                          //Prueba de agregado del token diabolico
+//                                          Provider provider = new Provider();
+//                                          provider.setName("Token");
+//                                          provider.setLibrary("/lib64/libASEP11.so");
+//                                          result.add(provider);
 	      } catch (Exception e) {
 
 	      }
