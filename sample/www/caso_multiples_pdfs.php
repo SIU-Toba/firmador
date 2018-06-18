@@ -7,7 +7,7 @@ $firmador = new firmador_pdf();
 //-- CASO BASE: Generar applet
 //---------------------------------
 if (! isset($_GET['accion'])) {
-	$cant_documentos = 68;
+	$cant_documentos = 1200;
 	$sesion = $firmador->generar_sesion();
 	$url_actual = $firmador->get_url_base_actual(). $_SERVER['REQUEST_URI'];
 	$url_pdf_base = $url_actual."?accion=enviar&codigo=$sesion";
@@ -76,15 +76,14 @@ if (! isset($_GET['accion'])) {
 		}
 		
 		function verDocumento(source) {
-			var success = new PDFObject(
-			{ 
-				url: source.value, 	
-				pdfOpenParams: { toolbar: "0", statusbar: "0" }
-			}).embed("pdf");
+                        document.getElementById("pdf").data = source.value;
+			/*PDFObject.embed(source.value, "#pdf", {
+                                pdfOpenParams: { scrollbar: '0', toolbar: '0', statusbar: '0', messages: '1' }
+                          });*/
 		}
 	</script>
-	
-	<div id="listado" style='display: none;float: left; width: 220px; margin-left: 20px; height: 600px;overflow:scroll;'>
+        <div style="margin-top: 40px; color: gray">Haga click en los documentos para visualizarlos.</div>	
+	<div id="listado" style='float: left; width: 220px; margin-left: 20px; height: 600px;overflow:scroll;'>
 	<input id="todos" type="checkbox" onclick="seleccionarTodos(this)" /> <label for="todos">Seleccionar Todos/Ninguno</label><br/><br/>
 	<?php 
 	for ($i = 1; $i <= $cant_documentos; $i++) {
@@ -93,9 +92,11 @@ if (! isset($_GET['accion'])) {
 	}
 	?>
 	</div>
-	<div id="pdf" style="display: none; float: right; border: 1px solid black; height:800px; width:600px; text-align: center">
-		<div style="margin-top: 40px; color: gray">Haga click en los documentos para visualizarlos.</div>
+	<object id="pdf" style=" float: right; border: 1px solid black; height:800px; width:600px; text-align: center" type="application/pdf" data=""> </object> 
+
 	</div>
+	</div>
+	<button onclick="javascript:location.href='visualizar.php'"> Ver Firmados </button>
 	</div>
 	</body>
 	</html>
@@ -153,6 +154,10 @@ if ($_GET['accion'] == 'recibir') {
 	$path = $_FILES['md5_fileSigned']['tmp_name'];
 	$id = (int) $_POST['id'];
 	$destino = dirname(dirname(__FILE__)).'/multiples_firmados/doc_'.$id.'.pdf';
+	if (file_exists($destino)) {
+            unlink($destino);
+	}
+	
 	if (! move_uploaded_file($path, $destino)) {
 		error_log("Error uploading file");
 		header('HTTP/1.1 500 Internal Server Error');

@@ -71,17 +71,17 @@ class firmador_pdf
    {
         $sesion = $this->generar_sesion();
 		?>	   
-			<div id="pdf" style="height:<?php echo $height;?>; width:<?php echo $width;?>; text-align: center">Parece que no tiene Adobe Reader o soporte PDF en este navegador.</br>Para configurar correctamente instale Adobe Reader y siga <a href="http://helpx.adobe.com/acrobat/using/display-pdf-browser-acrobat-xi.html">estas instrucciones</a>.
-			</div>
+			<object id="pdf" style="height:<?php echo $height;?>; width:<?php echo $width;?>;" type="application/pdf" data="<?php echo $url_descarga; ?>&codigo=<?php echo $sesion; ?>"> </object> 
+			
 			<script type="text/javascript" src="<?php echo $url_js; ?>"></script>
 			<script type="text/javascript">
 			  window.onload = function (){
-					var success = new PDFObject(
-					{ 
-						url: "<?php echo $url_descarga; ?>&codigo=<?php echo $sesion; ?>", 	
-						pdfOpenParams: { toolbar: "0", statusbar: "0" }
-					}).embed("pdf");
-				}
+			  /*
+			  var options = {
+                                pdfOpenParams: { scrollbar: '0', toolbar: '0', statusbar: '0', messages: '1' }
+                          };
+			  PDFObject.embed("<?php echo $url_descarga; ?>&codigo=<?php echo $sesion; ?>", "#pdf", options);*/
+			}
 			</script>
 		<?php	   
    }

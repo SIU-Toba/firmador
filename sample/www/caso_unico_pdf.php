@@ -47,7 +47,7 @@ if (! isset($_GET['accion'])) {
 								$url_actual."?accion=enviar",
 								$url_actual."?accion=recibir"
 							);
-	$firmador->generar_visor_pdf("pdfobject.min.js", $url_actual."?accion=enviar");
+	$firmador->generar_visor_pdf("pdfobject.min.js", $url_actual."?accion=enviar", '600px', '800px' );
 	?>
 	</div>
 	</body>
